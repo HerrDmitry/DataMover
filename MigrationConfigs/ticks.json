@@ -1,0 +1,26 @@
+{
+  "source": [
+    {
+      "name": "ticks",
+      "records": [
+        {
+          "rows": [
+            {
+              "columns": [
+                { "name": "SymbolId", "type": "Integer" },
+                { "name": "TickSizeId", "type": "Integer" },
+                { "name": "Timestamp", "type": "DateTime", "format": "yyyy-MM-dd hh:mm:ss" },
+                { "name": "Index", "type": "Integer" },
+                { "name": "PriceOpen", "type": "Double" },
+                { "name": "PriceClose", "type": "Double" },
+                { "name": "PriceLow", "type": "Double" },
+                { "name": "PriceHight", "type": "Double" },
+                { "name": "Volume", "type": "Integer" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
