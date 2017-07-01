@@ -79,7 +79,7 @@ namespace DataMover
 
         public ICollection<string> Keys => _record.Keys;
         public ICollection<IParser> Values => _record.Values;
-        public void Parse(string source)
+        public void Parse(IEnumerable<string> source)
         {
             throw new System.NotImplementedException();
         }
