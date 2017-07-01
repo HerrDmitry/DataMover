@@ -4,6 +4,7 @@
     {
         public ConfigurationLoader(string configuration)
         {
+
         }
     }
 }

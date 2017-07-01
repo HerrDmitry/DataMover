@@ -3,6 +3,6 @@ namespace DataMover.Loaders
 {
     public interface ILoader
     {
-        
+
     }
 }

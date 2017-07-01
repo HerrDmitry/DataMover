@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace DataMover.Configuration
 {
-    public class Row:IEnumerable<Column>
+    public class Row : IEnumerable<Column>
     {
         private readonly List<Column> _columns;
 
         public Row(IEnumerable<Column> columns)
         {
-            _columns = new List<Column> (columns);
+            _columns = new List<Column>(columns);
         }
 
         public IEnumerator<Column> GetEnumerator()

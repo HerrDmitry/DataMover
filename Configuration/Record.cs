@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DataMover.Configuration
 {
-    public class Record:IEnumerable<Row>
+    public class Record : IEnumerable<Row>
     {
         private readonly List<Row> _rows;
 

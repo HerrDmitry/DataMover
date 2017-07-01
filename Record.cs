@@ -68,7 +68,7 @@ namespace DataMover
 
         public bool TryGetValue(string key, out IParser value)
         {
-            return _record.TryGetValue(key,out value);
+            return _record.TryGetValue(key, out value);
         }
 
         public IParser this[string key]

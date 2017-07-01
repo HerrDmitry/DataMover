@@ -3,7 +3,7 @@ using DataMover.Parsers;
 
 namespace DataMover
 {
-    public interface IRecord:IEnumerable<IParser>,IDictionary<string,IParser>
+    public interface IRecord : IEnumerable<IParser>, IDictionary<string, IParser>
     {
         void Parse(IEnumerable<string> source);
     }
