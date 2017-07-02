@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace DataMover.Configuration
 {
@@ -8,6 +10,7 @@ namespace DataMover.Configuration
         public string Path { get; }
         public int ReaderLines { get; }
         public int FooterLines { get; }
+        [JsonProperty("records")]
         public IEnumerable<Record> Records { get; }
     }
 }

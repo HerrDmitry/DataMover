@@ -1,25 +1,28 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace DataMover.Configuration
 {
     public class Row : IEnumerable<Column>
     {
-        private readonly List<Column> _columns;
+        [JsonProperty("columns")]
+        public List<Column> Columns { get; set; }
 
         public Row(IEnumerable<Column> columns)
         {
-            _columns = new List<Column>(columns);
+            Columns = new List<Column>(columns);
         }
 
         public IEnumerator<Column> GetEnumerator()
         {
-            return _columns.GetEnumerator();
+            return Columns.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _columns.GetEnumerator();
+            return Columns.GetEnumerator();
         }
     }
 }

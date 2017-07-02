@@ -1,25 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace DataMover.Configuration
 {
     public class Record : IEnumerable<Row>
     {
-        private readonly List<Row> _rows;
+        [JsonProperty("rows")]
+        public List<Row> Rows { get; set; }
 
         public Record(IEnumerable<Row> rows)
         {
-            _rows = new List<Row>(rows);
+            Rows = new List<Row>(rows);
         }
 
         public IEnumerator<Row> GetEnumerator()
         {
-            return _rows.GetEnumerator();
+            return Rows.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _rows.GetEnumerator();
+            return Rows.GetEnumerator();
         }
     }
 }

@@ -6,6 +6,7 @@
   <ItemGroup>
     <Folder Include="Loaders\" />
     <Folder Include="Parsers\" />
+    <Folder Include="Configuration\JsonConverters\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
