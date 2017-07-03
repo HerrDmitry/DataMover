@@ -39,3 +39,6 @@ Thumbs.db
 # dotCover
 *.dotCover
 .idea
+/.vs
+/.vs/slnx.sqlite
+.vs

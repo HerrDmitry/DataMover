@@ -10,7 +10,7 @@ namespace DataMoverTests
     public class ColumnTypeConverterTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void TestColumnTypeConverter()
         {
             var converter = new ColumnTypeConverter();
             var names = Enum.GetNames(typeof(ColumnType));
