@@ -19,7 +19,7 @@ namespace DataMoverTests
                 reader.SetValue(name.ToLower());
                 var type= (ColumnType)converter.ReadJson(reader,null,null,null);
                 var expectedType = Enum.Parse(typeof(ColumnType), name, true);
-                Assert.AreEqual(expectedType,type);
+                Assert.AreEqual(expectedType,type,"types should be equal");
             }
         }
 
