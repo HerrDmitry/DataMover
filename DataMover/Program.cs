@@ -34,7 +34,7 @@ namespace DataMover
             {
                 var stream = System.IO.File.Open(configuration.Files[0].Path, FileMode.Open, FileAccess.Read,
                     FileShare.Read);
-                var loader = new CsvLoader();
+                var loader = new CsvLoader(configuration.Files[0].Name);
                 foreach (var l in loader.ReadLines(stream))
                 {
                 }

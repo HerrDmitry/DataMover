@@ -20,20 +20,23 @@ namespace DataMover.Loaders
         private Task _readerTask;
         private int _bufferSizeRows;
         private int _readBufferSize;
+        private string _name;
         
         private const int READ_BUFFER_SIZE = 1024 * 1024;
         private const int MAX_LINE_SIZE = 1024 * 1024*20;
 
-        public CsvLoader(char textQualifier = '"', char delimiter = ',', int bufferSizeRows=10000, int readBufferSize=READ_BUFFER_SIZE)
+        public CsvLoader(string name, char textQualifier = '"', char delimiter = ',', int bufferSizeRows=10000, int readBufferSize=READ_BUFFER_SIZE)
         {
             _textQualifier = textQualifier;
             _delimiter = delimiter;
             _bufferSizeRows = bufferSizeRows;
             _readBufferSize = readBufferSize;
+            _name = name;
         }
 
         public IEnumerable<DataRow> ReadLines(Stream source)
         {
+            DataMoverLog.DebugAsync($"Ready to load file \"{_name}\"");
             _reader=new StreamReader(source);
             _readerTask = Task.Run(() => FastReadLineTask());
             
@@ -49,6 +52,7 @@ namespace DataMover.Loaders
                     Thread.Sleep(50);
                 }
             }
+            DataMoverLog.DebugAsync($"File \"{_name}\" is loaded.");
         }
         
         private unsafe void FastReadLineTask()
@@ -76,6 +80,7 @@ namespace DataMover.Loaders
                         {
                             if (MAX_LINE_SIZE < lineLength + bufferPosition - startPosition)
                             {
+                                DataMoverLog.ErrorAsync($"Line {counter+1} in file {_name} is too big");
                                 throw new FileLoadException("Line is too big");
                             }
                             var newLineLength = lineLength + bufferPosition - startPosition;
@@ -136,19 +141,19 @@ namespace DataMover.Loaders
 
 							_buffer.Enqueue(new DataRow { Columns = columns, RowNumber = counter });
 						} catch(Exception ex){
-                            DataMoverLog.ErrorAsync($"Row {counter} throws: {ex.Message}" );
+                            DataMoverLog.ErrorAsync($"File \"{_name}\", row {counter} throws: {ex.Message}" );
                             DataMoverLog.DebugAsync(new StringBuilder().Append(line).ToString());
                         }
 
                         if (stopwatch.Elapsed.TotalSeconds - lastelapsed >= 10)
                         {
-                            DataMoverLog.DebugAsync($"Loaded {counter} lines in {stopwatch.Elapsed.TotalSeconds} seconds");
+                            DataMoverLog.DebugAsync($"Loaded {counter} lines from \"{_name}\" in {stopwatch.Elapsed.TotalSeconds} seconds");
                             lastelapsed = stopwatch.Elapsed.TotalSeconds;
                         }
                     }
 
                     stopwatch.Stop();
-                    DataMoverLog.DebugAsync($"Loaded {counter} lines in {stopwatch.Elapsed.TotalSeconds} seconds.");
+                    DataMoverLog.DebugAsync($"Loaded {counter} lines from \"{_name}\" in {stopwatch.Elapsed.TotalSeconds} seconds.");
                     _eof = true;
                 }
             }catch(Exception ex){
