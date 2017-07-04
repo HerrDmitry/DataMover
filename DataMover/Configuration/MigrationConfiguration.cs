@@ -7,6 +7,9 @@ namespace DataMover.Configuration
     {
         [JsonProperty("sources")]
         public List<Source> Sources { get; set; }
+
+        [JsonProperty("files")]
+        public List<File> Files { get; set; }
     }
     
 }

@@ -6,11 +6,11 @@ namespace DataMover.Configuration
 {
     public class Source
     {
-        public string Name { get; }
-        public string Path { get; }
-        public int ReaderLines { get; }
-        public int FooterLines { get; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        public int ReaderLines { get; set; }
+        public int FooterLines { get; set;  }
         [JsonProperty("records")]
-        public IEnumerable<Record> Records { get; }
+        public List<Record> Records { get; set; }
     }
 }

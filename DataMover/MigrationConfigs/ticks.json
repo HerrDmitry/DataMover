@@ -50,5 +50,11 @@
         }
       ]
     }
-  ]
+  ],
+  "files":[{
+    "name":"ticks",
+    "path":"/Users/dmitry/Documents/tests/ticks.csv",
+    "textQualifier":"\"",
+    "delimiter":","
+  }]
 }

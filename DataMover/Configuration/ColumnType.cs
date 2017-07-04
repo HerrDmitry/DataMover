@@ -5,7 +5,7 @@
         String,
         Date,
         DateTime,
-        Indeger,
+        Integer,
         Double
     }
 }

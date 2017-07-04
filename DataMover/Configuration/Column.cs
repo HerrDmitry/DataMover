@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DataMover.Configuration.JsonConverters;
+using Newtonsoft.Json;
 
 namespace DataMover.Configuration
 {
@@ -8,6 +9,8 @@ namespace DataMover.Configuration
         public string Name { get; set; }
         [JsonProperty("format")]
         public string Format { get; set; }
+        [JsonProperty("type")]
+        [JsonConverter(typeof(ColumnTypeConverter))]
         public ColumnType Type { get; set; }
     }
 }

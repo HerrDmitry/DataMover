@@ -1,4 +1,10 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using DataMover.Configuration;
+using DataMover.Loaders;
+using DataMover.Logger;
 
 namespace DataMover
 {
@@ -6,7 +12,41 @@ namespace DataMover
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            DataMoverLog.InfoAsync("Starting the application");
+            MigrationConfiguration configuration = null;
+            if (args.Length > 0)
+            {
+                DataMoverLog.DebugAsync("Received parameters:");
+                for (var i = 0; i < args.Length; i++)
+                {
+                    DataMoverLog.DebugAsync($"{i} - {args[i]}");
+                }
+
+                configuration = ConfigurationLoader.LoadConfiguration(args);
+            }
+
+            if (configuration == null)
+            {
+                DataMoverLog.ErrorAsync("Missing configuration.");
+                PrintUsage();
+            }
+            else
+            {
+                var stream = System.IO.File.Open(configuration.Files[0].Path, FileMode.Open, FileAccess.Read,
+                    FileShare.Read);
+                var loader = new CsvLoader();
+                foreach (var l in loader.ReadLines(stream))
+                {
+                }
+            }
+            Thread.Sleep(500);
+            DataMoverLog.Terminate();
+        }
+
+        private static void PrintUsage()
+        {
+            Console.WriteLine("Usage: ");
+            Console.WriteLine("DataMover /c:{configuration file} [/f:{name}={source/target file} /f:{name}={source/target file} ...]");
         }
     }
 }
