@@ -99,8 +99,8 @@ namespace DataMover.Loaders
 
                             if (bufferPosition == bufferLength)
                             {
-                                appendToLine();
-                                if (_reader.EndOfStream)
+								appendToLine();
+								if (_reader.EndOfStream)
                                 {
                                     break;
                                 }
@@ -110,16 +110,21 @@ namespace DataMover.Loaders
                             }
                             else
                             {
-                                if (bufferPosition > startPosition + 1)
+                                if (bufferPosition > startPosition)
                                 {
                                     appendToLine();
+                                }
+                                if (lineLength > 0)
+                                {
                                     hasLine = true;
                                 }
                                 bufferPosition++;
                                 startPosition = bufferPosition;
                             }
                         }
-
+                        if (lineLength==1 && (line[0]=='\r' || line[0]=='\n')){
+                            continue;
+                        }
                         counter++;
                         try
                         {
