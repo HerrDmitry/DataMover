@@ -13,16 +13,18 @@ namespace DataMover.Loaders
     public class CsvLoader : ILoader
     {
         private ConcurrentQueue<DataRow> _buffer=new ConcurrentQueue<DataRow>();
+        private ConcurrentQueue<RawLine> _rawLineBuffer = new ConcurrentQueue<RawLine>();
         private StreamReader _reader;
         private volatile bool _eof;
         private char _textQualifier;
         private char _delimiter;
         private Task _readerTask;
+        private Task[] _splitterTasks;
         private int _bufferSizeRows;
         private int _readBufferSize;
         private string _name;
         
-        private const int READ_BUFFER_SIZE = 1024 * 1024;
+        private const int READ_BUFFER_SIZE = 1024 * 256;
         private const int MAX_LINE_SIZE = 1024 * 1024*20;
 
         public CsvLoader(string name, char textQualifier = '"', char delimiter = ',', int bufferSizeRows=10000, int readBufferSize=READ_BUFFER_SIZE)
@@ -39,7 +41,12 @@ namespace DataMover.Loaders
             DataMoverLog.DebugAsync($"Ready to load file \"{_name}\"");
             _reader=new StreamReader(source);
             _readerTask = Task.Run(() => FastReadLineTask());
-            
+            var splitterTasks = Environment.ProcessorCount;
+            _splitterTasks = new Task[splitterTasks];
+            for (var i = 0; i < splitterTasks; i++)
+            {
+                _splitterTasks[i]=Task.Run(() => SplitIntoColumnsTask());
+            }
             while (!_eof || _buffer.Count>0)
             {
                 while (_buffer.TryDequeue(out DataRow line))
@@ -49,6 +56,7 @@ namespace DataMover.Loaders
 
                 if (!_eof)
                 {
+                    DataMoverLog.DebugAsync("read buffer is empty");
                     Thread.Sleep(50);
                 }
             }
@@ -133,13 +141,12 @@ namespace DataMover.Loaders
                         counter++;
                         try
                         {
-                            var columns = this.SplitIntoColumns(line, lineLength);
-							while (_bufferSizeRows != 0 && _buffer.Count > _bufferSizeRows)
-							{
-								Thread.Sleep(50);
-							}
-
-							_buffer.Enqueue(new DataRow { Columns = columns, RowNumber = counter });
+                            while (_bufferSizeRows != 0 && _rawLineBuffer.Count > _bufferSizeRows)
+                            {
+                                //DataMoverLog.DebugAsync($"Read buffer for {_name} is full");
+                                Thread.Sleep(50);
+                            }
+                            _rawLineBuffer.Enqueue(new RawLine{Line=line,LineLength=lineLength, LineNumber = counter});
 						} catch(Exception ex){
                             DataMoverLog.ErrorAsync($"File \"{_name}\", row {counter} throws: {ex.Message}" );
                             DataMoverLog.DebugAsync(new StringBuilder().Append(line).ToString());
@@ -159,6 +166,22 @@ namespace DataMover.Loaders
             }catch(Exception ex){
 				_eof = true;
 				DataMoverLog.ErrorAsync(ex.Message);
+            }
+        }
+
+        private void SplitIntoColumnsTask()
+        {
+            while (!_eof || _buffer.Count > 0 || _rawLineBuffer.Count > 0)
+            {
+                while(_rawLineBuffer.TryDequeue(out RawLine line)){
+                    var columns = this.SplitIntoColumns(line.Line, line.LineLength);
+                    while (_bufferSizeRows != 0 && _buffer.Count > _bufferSizeRows)
+                    {
+                        Thread.Sleep(50);
+                    }
+
+                    _buffer.Enqueue(new DataRow { Columns = columns, RowNumber = line.LineNumber });
+                }
             }
         }
 
@@ -259,6 +282,13 @@ namespace DataMover.Loaders
                 }
             }
             return result.ToArray();
+        }
+
+        private struct RawLine
+        {
+            public char[] Line;
+            public int LineLength;
+            public long LineNumber;
         }
     }
 }

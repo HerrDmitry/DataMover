@@ -13,7 +13,7 @@ namespace DataMoverTests
         public void ReadOneLineFile()
         {
             var s = "'a','b','c'";
-            var loader = new CsvLoader('\'');
+            var loader = new CsvLoader("test",'\'');
             var rows = loader.ReadLines(GetStreamFromString(s)).ToList();
             Assert.AreEqual(1,rows.Count);
             Assert.AreEqual(3,rows[0].Columns.Length);
@@ -28,7 +28,7 @@ namespace DataMoverTests
             var s = "'a','b','c'\r\n'd','e','f'\r'g','h','i'\nj,k,l";
             for (var b = 1; b < s.Length; b+=1)
             {
-                var loader = new CsvLoader(textQualifier:'\'', readBufferSize:b);
+                var loader = new CsvLoader("test",textQualifier:'\'', readBufferSize:b);
                 var rows = loader.ReadLines(GetStreamFromString(s)).ToList();
                 Assert.AreEqual(4, rows.Count, $"Buffer size {b} failed");
                 Assert.AreEqual("a",rows[0].Columns[0]);
