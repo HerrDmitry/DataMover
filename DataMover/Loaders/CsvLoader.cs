@@ -42,6 +42,11 @@ namespace DataMover.Loaders
             _reader=new StreamReader(source);
             _readerTask = Task.Run(() => FastReadLineTask());
             var splitterTasks = Environment.ProcessorCount;
+            splitterTasks /= 2;
+            if (splitterTasks < 1)
+            {
+                splitterTasks = 1;
+            }
             _splitterTasks = new Task[splitterTasks];
             for (var i = 0; i < splitterTasks; i++)
             {
@@ -56,7 +61,7 @@ namespace DataMover.Loaders
 
                 if (!_eof)
                 {
-                    DataMoverLog.DebugAsync("read buffer is empty");
+                    //DataMoverLog.DebugAsync("read buffer is empty");
                     Thread.Sleep(50);
                 }
             }
@@ -65,6 +70,7 @@ namespace DataMover.Loaders
         
         private unsafe void FastReadLineTask()
         {
+            DataMoverLog.DebugAsync($"Started reader thread for \"{_name}\"");
             try
             {
                 var cBuff = new char[_readBufferSize];
@@ -88,7 +94,7 @@ namespace DataMover.Loaders
                         {
                             if (MAX_LINE_SIZE < lineLength + bufferPosition - startPosition)
                             {
-                                DataMoverLog.ErrorAsync($"Line {counter+1} in file {_name} is too big");
+                                DataMoverLog.ErrorAsync($"Line {counter+1} in file \"{_name}\" is too big");
                                 throw new FileLoadException("Line is too big");
                             }
                             var newLineLength = lineLength + bufferPosition - startPosition;
@@ -144,7 +150,7 @@ namespace DataMover.Loaders
                             while (_bufferSizeRows != 0 && _rawLineBuffer.Count > _bufferSizeRows)
                             {
                                 //DataMoverLog.DebugAsync($"Read buffer for {_name} is full");
-                                Thread.Sleep(50);
+                                Thread.Sleep(10);
                             }
                             _rawLineBuffer.Enqueue(new RawLine{Line=line,LineLength=lineLength, LineNumber = counter});
 						} catch(Exception ex){
@@ -167,22 +173,25 @@ namespace DataMover.Loaders
 				_eof = true;
 				DataMoverLog.ErrorAsync(ex.Message);
             }
+            DataMoverLog.DebugAsync($"Stopped reader thread for \"{_name}\"");
         }
 
         private void SplitIntoColumnsTask()
         {
+            DataMoverLog.DebugAsync($"Started line split thread for \"{_name}\"");
             while (!_eof || _buffer.Count > 0 || _rawLineBuffer.Count > 0)
             {
                 while(_rawLineBuffer.TryDequeue(out RawLine line)){
                     var columns = this.SplitIntoColumns(line.Line, line.LineLength);
                     while (_bufferSizeRows != 0 && _buffer.Count > _bufferSizeRows)
                     {
-                        Thread.Sleep(50);
+                        Thread.Sleep(10);
                     }
 
                     _buffer.Enqueue(new DataRow { Columns = columns, RowNumber = line.LineNumber });
                 }
             }
+            DataMoverLog.DebugAsync($"Stopped line split thread for \"{_name}\"");
         }
 
         private unsafe string[] SplitIntoColumns(char[] source, int length)
