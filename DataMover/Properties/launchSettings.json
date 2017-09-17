@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DataMover": {
+      "commandName": "Project",
+      "commandLineArgs": "/c:MigrationConfigs/ticks.json"
+    }
+  }
+}
