@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -7,6 +7,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataMoverTests", "DataMoverTests\DataMoverTests.csproj", "{2AADD4F2-14C1-42D3-9957-4AE70DFD9B47}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaces", "Interfaces\Interfaces.csproj", "{963ACC62-D26D-4590-9EDA-E244038C324A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvReader", "CsvReader\CsvReader.csproj", "{8398B8B8-9EDE-4F32-BFC4-19735B06B204}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +28,10 @@ Global
 		{963ACC62-D26D-4590-9EDA-E244038C324A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{963ACC62-D26D-4590-9EDA-E244038C324A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{963ACC62-D26D-4590-9EDA-E244038C324A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8398B8B8-9EDE-4F32-BFC4-19735B06B204}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8398B8B8-9EDE-4F32-BFC4-19735B06B204}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8398B8B8-9EDE-4F32-BFC4-19735B06B204}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8398B8B8-9EDE-4F32-BFC4-19735B06B204}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
