@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using Interfaces;
 
-namespace CsvReader
+namespace FileReader
 {
-    public class Reader:IStreamReader
+    public class CsvReader:IStreamReader
     {
         public IEnumerable<IRawLine> Read(Stream stream, IConfiguration config)
         {
