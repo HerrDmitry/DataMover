@@ -7,7 +7,7 @@ namespace FileReader
 {
     public class CsvReader:IStreamReader
     {
-        public IEnumerable<IRawLine> Read(Stream stream, IConfiguration config)
+        public IEnumerable<IRawLine> Read(Stream stream, IContext config)
         {
             throw new NotImplementedException();
         }

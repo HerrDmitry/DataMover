@@ -5,6 +5,6 @@ namespace Interfaces
 {
     public interface IStreamReader
     {
-        IEnumerable<IRawLine> Read(Stream stream, IConfiguration config);
+        IEnumerable<IRawLine> Read(Stream stream, IContext context);
     }
 }
