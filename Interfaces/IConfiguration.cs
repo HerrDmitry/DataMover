@@ -2,6 +2,6 @@
 {
     public interface IConfiguration
     {
-        string GetValue(string key);
+        object GetValue(string key);
     }
 }
