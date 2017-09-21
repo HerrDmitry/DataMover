@@ -10,12 +10,9 @@
     <LangVersion>Latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170517-02" />
-    <PackageReference Include="MSTest.TestAdapter" Version="1.1.18" />
-    <PackageReference Include="MSTest.TestFramework" Version="1.1.18" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\DataMover\DataMover.csproj">
+    </ProjectReference>
+    <ProjectReference Include="..\FileReader\FileReader.csproj">
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -25,5 +22,10 @@
     <None Update="log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
+    <PackageReference Include="NUnit" Version="2.6.4" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
   </ItemGroup>
 </Project>

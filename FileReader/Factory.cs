@@ -6,7 +6,7 @@ namespace FileReader
     public static class Factory
     {
         
-        public static Func<Func<string>> GetReader(string Func<string> getReaderType)
+/*        public static Func<Func<string>> GetReader(string Func<string> getReaderType)
         {
             switch (getReaderType())
             {
@@ -15,6 +15,6 @@ namespace FileReader
                 default:
                     return null;
             }
-        }
+        }*/
     }
 }

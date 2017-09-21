@@ -5,9 +5,6 @@ using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
-using log4net;
-using log4net.Config;
-using log4net.Core;
 
 namespace DataMover.Logger
 {
@@ -17,12 +14,12 @@ namespace DataMover.Logger
 
         static DataMoverLog()
         {
-            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+/*            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             if (File.Exists("log4net.config"))
             {
                 XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
             }
-            
+  */          
             _token=new CancellationTokenSource();
             _loggerTask=Task.Run(()=>LoggerTask(_token.Token));
             DebugAsync("Logging is initialized");
@@ -60,7 +57,7 @@ namespace DataMover.Logger
 
         private static void LoggerTask(CancellationToken token)
         {
-            var logger = LogManager.GetLogger(typeof(DataMoverLog));
+            /*var logger = LogManager.GetLogger(typeof(DataMoverLog));
             while (!token.IsCancellationRequested)
             {
                 while (_logQueue.TryDequeue(out LogMessage message))
@@ -86,7 +83,7 @@ namespace DataMover.Logger
                 {
                     Thread.Sleep(100);
                 }
-            }
+            }*/
         }
 
         private static Task _loggerTask;

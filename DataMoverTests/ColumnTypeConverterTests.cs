@@ -1,12 +1,12 @@
 using System;
 using DataMover.Configuration;
 using DataMover.Configuration.JsonConverters;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 
 namespace DataMoverTests
 {
-    [TestClass]
+/*    [TestClass]
     public class ColumnTypeConverterTests
     {
         [TestMethod]
@@ -34,5 +34,5 @@ namespace DataMoverTests
                 this.SetToken(JsonToken.Raw,value);
             }
         }
-    }
+    }*/
 }

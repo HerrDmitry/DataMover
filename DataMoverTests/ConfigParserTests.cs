@@ -1,10 +1,10 @@
 ﻿using System.Linq;
 using DataMover.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DataMoverTests
 {
-    [TestClass]
+/*    [TestClass]
     public class ConfigParserTests
     {
         [TestMethod]
@@ -56,5 +56,5 @@ namespace DataMoverTests
             Assert.AreEqual("test column 4",config.Sources[0].Records.First().Rows.Last().Columns.Last().Name);
             Assert.AreEqual(ColumnType.Double,config.Sources[0].Records.First().Rows.Last().Columns.Last().Type);
         }
-    }
+    }*/
 }

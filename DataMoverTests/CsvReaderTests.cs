@@ -2,13 +2,39 @@
 using System.Linq;
 using System.Text;
 using DataMover.Loaders;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FileReader;
+//using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DataMoverTests
 {
-    [TestClass]
+/*    [TestClass]
     public class CsvReaderTests
     {
+        [TestMethod]
+        public void CsvReadTest()
+        {
+            var s = "'a','b','c'";
+            var stream = GetStreamFromString(s);
+            var reader = stream.CsvReader((string key) =>
+            {
+                switch (key)
+                {
+                    case "delimiter":
+                        return ',';
+                    case "qualifier":
+                        return '\'';
+                    default:
+                        return null;
+                }
+            });
+            Assert.IsNotNull(reader);
+            var row = reader();
+            Assert.IsNotNull(row);
+            Assert.AreEqual("a",row().ToString());
+            Assert.AreEqual("b",row().ToString());
+            Assert.AreEqual("c",row().ToString());
+        }
+
         [TestMethod]
         public void ReadOneLineFile()
         {
@@ -55,5 +81,5 @@ namespace DataMoverTests
             stream.Position = 0;
             return stream;        
         }
-    }
+    }*/
 }
