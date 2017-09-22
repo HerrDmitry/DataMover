@@ -1,13 +1,13 @@
 ﻿using System.IO;
 using FileReader;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DataMoverTests
 {
-    [TestFixture]
+    [TestClass]
     public class ReaderTests
     {
-        [Test]
+        [TestMethod]
         public void CsvReadTest()
         {
             var s = "'a','b','c'";

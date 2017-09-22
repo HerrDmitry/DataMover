@@ -59,24 +59,24 @@ namespace Importer
             }
             var buffer = new char[655350];
             var watch = Stopwatch.StartNew();
-            var reader = new StreamReader(args[0]);
+            var reader = new StreamReader(File.Open(args[0],FileMode.Open,FileAccess.Read,FileShare.Read));
             while (!reader.EndOfStream) reader.ReadBlock(buffer, 0, 655350);
             watch.Stop();
             Console.WriteLine(watch.ElapsedMilliseconds);
             watch=Stopwatch.StartNew();
-            reader = new StreamReader(args[0]);
+            reader = new StreamReader(File.Open(args[0],FileMode.Open,FileAccess.Read,FileShare.Read));;
             var rdFunc = read(reader);
             while (rdFunc()> -1);
             watch.Stop();
             Console.WriteLine(watch.ElapsedMilliseconds);
             watch=Stopwatch.StartNew();
-            reader = new StreamReader(args[0]);
+            reader = new StreamReader(File.Open(args[0],FileMode.Open,FileAccess.Read,FileShare.Read));
             rdFunc = read1(reader);
             while (rdFunc()> -1);
             watch.Stop();
             Console.WriteLine(watch.ElapsedMilliseconds);
             watch=Stopwatch.StartNew();
-            reader = new StreamReader(args[0]);
+            reader = new StreamReader(File.Open(args[0],FileMode.Open,FileAccess.Read,FileShare.Read));
             var nextRow = reader.CsvReader(key =>
             {
                 switch (key)

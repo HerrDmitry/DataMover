@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using DataMover.Configuration;
 using DataMover.Loaders;
 using DataMover.Logger;
@@ -40,7 +41,7 @@ namespace DataMover
                 {
                 }
             }
-            Thread.Sleep(500);
+            Task.Delay(TimeSpan.FromMilliseconds(500)).Wait();
             DataMoverLog.Terminate();
         }
 

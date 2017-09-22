@@ -62,7 +62,7 @@ namespace DataMover.Loaders
                 if (!_eof)
                 {
                     //DataMoverLog.DebugAsync("read buffer is empty");
-                    Thread.Sleep(50);
+                    Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
                 }
             }
             DataMoverLog.DebugAsync($"File \"{_name}\" is loaded.");
@@ -150,7 +150,7 @@ namespace DataMover.Loaders
                             while (_bufferSizeRows != 0 && _rawLineBuffer.Count > _bufferSizeRows)
                             {
                                 //DataMoverLog.DebugAsync($"Read buffer for {_name} is full");
-                                Thread.Sleep(10);
+                                Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
                             }
                             _rawLineBuffer.Enqueue(new RawLine{Line=line,LineLength=lineLength, LineNumber = counter});
 						} catch(Exception ex){
@@ -185,7 +185,7 @@ namespace DataMover.Loaders
                     var columns = this.SplitIntoColumns(line.Line, line.LineLength);
                     while (_bufferSizeRows != 0 && _buffer.Count > _bufferSizeRows)
                     {
-                        Thread.Sleep(10);
+                        Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
                     }
 
                     _buffer.Enqueue(new DataRow { Columns = columns, RowNumber = line.LineNumber });
