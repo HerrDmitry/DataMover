@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using FileReader;
 
 namespace Importer
 {
@@ -74,7 +75,33 @@ namespace Importer
             while (rdFunc()> -1);
             watch.Stop();
             Console.WriteLine(watch.ElapsedMilliseconds);
+            watch=Stopwatch.StartNew();
+            reader = new StreamReader(args[0]);
+            var nextRow = reader.CsvReader(key =>
+            {
+                switch (key)
+                {
+                    case "delimiter":
+                        return ',';
+                    case "qualifier":
+                        return '\'';
+                    default:
+                        return null;
+                }
+            });
+            var rows = 0;
+            var nextColumn = nextRow();
+            while (nextColumn != null)
+            {
+                rows++;
+                while (nextColumn() != null) ;
+                nextColumn = nextRow();
+            }
+            watch.Stop();
+            Console.WriteLine(rows);
+            Console.WriteLine(watch.ElapsedMilliseconds);
             Console.WriteLine("Hello World!");
+            
         }
     }
 }

@@ -8,9 +8,16 @@ namespace FileReader
 {
     public static partial class Readers
     {
-        public static Func<Func<StringBuilder>> CsvReader(this Stream stream, Func<string,object> getValue)
+        public static Func<Func<StringBuilder>> CsvReader(this Stream stream, Func<string, object> getValue)
         {
-            var readNext=new StreamReader(stream).BufferedRead();
+            return new StreamReader(stream).CsvReader(getValue);
+        }
+        
+        
+
+        public static Func<Func<StringBuilder>> CsvReader(this StreamReader stream, Func<string,object> getValue)
+        {
+            var readNext=stream.BufferedRead();
             var d = getValue("delimiter") as char?;
             var q = getValue("qualifier") as char?;
             var delimiter = d ?? ',';
