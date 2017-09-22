@@ -43,17 +43,27 @@ namespace FileReader
                         if (c == qualifier)
                         {
                             isQualified = !isQualified;
+                            if (isQualified && column.Length > 0)
+                            {
+                                column.Append((char)c);
+                            }
                         }
+                        else
                         if (c == delimiter && !isQualified)
                         {
                             columns.Enqueue(column);
-                            column=new StringBuilder();
+                            column = new StringBuilder();
                         }
+                        else
                         if ((c == '\n' || c == '\r') && !isQualified)
                         {
                             columns.Enqueue(column);
                             column = null;
                             break;
+                        }
+                        else
+                        {
+                            column.Append((char)c);
                         }
                         c = readNext();
                     }

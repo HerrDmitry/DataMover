@@ -52,6 +52,7 @@ namespace Importer
             if (args.Length == 0)
             {
                 Console.WriteLine("oops");
+                return;
             }
             if (!File.Exists(args[0]))
             {
