@@ -3,7 +3,7 @@ using System.IO;
 
 namespace FileReader
 {
-    public static class FileReader
+    public static partial class Readers
     {
         public static Func<int> BufferedRead (this StreamReader r)
         {

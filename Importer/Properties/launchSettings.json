@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Importer": {
+      "commandName": "Project",
+      "commandLineArgs": "D:\\data\\Ticks.csv"
+    }
+  }
+}

@@ -12,8 +12,6 @@ namespace FileReader
         {
             return new StreamReader(stream).CsvReader(getValue);
         }
-        
-        
 
         public static Func<Func<StringBuilder>> CsvReader(this StreamReader stream, Func<string,object> getValue)
         {
@@ -28,7 +26,6 @@ namespace FileReader
                 lock (locker)
                 {
                     var columns = new Queue<StringBuilder>();
-                    var endOfLine = false;
                     int c;
                     while ((c = readNext()) >= 0 && (c == '\n' || c == '\r')) ;
                     if (c < 0)
@@ -36,7 +33,6 @@ namespace FileReader
                         return null;
                     }
                     var isQualified = false;
-                    var isRowDone = false;
                     var column=new StringBuilder();
                     while (c>=0)
                     {
