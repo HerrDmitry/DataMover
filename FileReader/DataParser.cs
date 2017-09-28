@@ -31,5 +31,15 @@ namespace FileReader
             }
             return null;
         }
+
+        public static Func<StringBuilder, IValue> GetValueParser(this ColumnType type, string format)
+        {
+            switch (type)
+            {
+                case ColumnType.String:
+                    return value => { value.ToString(); };
+            }
+            return null;
+        }
     }
 }
