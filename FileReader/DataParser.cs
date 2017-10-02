@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Interfaces;
 using Interfaces.FileDefinition;
@@ -37,9 +38,79 @@ namespace FileReader
             switch (type)
             {
                 case ColumnType.String:
-                    return value => { value.ToString(); };
+                default:
+                    return value => new StringValue(value,format);
             }
-            return null;
+        }
+
+        private class IntegerValue : Value<int>
+        {
+            public IntegerValue(StringBuilder source, string format) : base(source, format, conversion
+                )
+            {
+                
+            }
+            
+            private static int conversion (StringBuilder s, string f, Action<string> setError)
+            {
+                if (int.TryParse(s.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture,
+                    out var result))
+                {
+                    return result;
+                }
+
+                setError($"Failed to convert {s} to int");
+
+                return 0;
+            }
+        }
+
+        private class StringValue : Value<string>
+        {
+            public StringValue(StringBuilder source, string format):base(source,format, (s, f, setError) => s.ToString())
+            {
+            }
+        }
+
+        private class Value<T>:IValue<T>
+        {
+            protected readonly StringBuilder source;
+            protected readonly string format;
+            protected string error;
+            private Func<Func<T>> conversion;
+
+            protected Value(StringBuilder source, string format, Func<StringBuilder,string,Action<string>,T> conversionFunc)
+            {
+                this.source = source;
+                this.format = format;
+                this.error = null;
+                conversion = () =>
+                {
+                    var val = conversionFunc(source,format, (error) => { this.error = error; });
+                    return ()=>val;
+                };
+
+            }
+
+            public T GetValue()
+            {
+                return conversion()();
+            }
+
+            public override string ToString()
+            {
+                return this.ToString(null);
+            }
+
+            public virtual string ToString(string format)
+            {
+                return this.ToString();
+            }
+
+            public virtual string GetError()
+            {
+                return this.error;
+            }
         }
     }
 }
