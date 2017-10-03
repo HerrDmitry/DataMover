@@ -6,12 +6,9 @@ namespace Interfaces
 {
     public interface ISourceRow
     {
-        IEnumerable<StringBuilder>[] Columns { get; }
-        StringBuilder Source { get; }
-        bool HasError { get; }
+        IDictionary<string, IValue> Columns { get; }
         string Error { get; }
         long RowNumber { get; }
-        long ParsedLineNumber { get; }
         long RawLineNumber { get; }
     }
 }
