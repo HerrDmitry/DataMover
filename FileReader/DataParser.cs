@@ -12,6 +12,10 @@ namespace FileReader
     {
         public static Func<ISourceRow> ParseData(this Func<Func<StringBuilder>> reader, Func<string, object> getValue)
         {
+            if (getValue == null)
+            {
+                throw new ArgumentNullException("getValue cannot be null");
+            }
             long sourceLineNumber = 0;
             long rowNumber = 0;
             var fileConfig = getValue("SourceConfiguration") as IFile;
@@ -32,7 +36,6 @@ namespace FileReader
             var currentRecord = 0;
             return () =>
             {
-                var columns = new Dictionary<string, IValue>();
                 int lineNumber = 0;
                 SourceRow row = null;
                 string error = "";
@@ -64,7 +67,13 @@ namespace FileReader
                     for (var cIndex = 0; cIndex < rowParsers.Item2.Count; cIndex++)
                     {
                         var rowParser = rowParsers.Item2[cIndex];
-                        parsedColumns.Add(rowParser.Item1.Name, rowParser.Item2(sourceColumns[cIndex]));
+                        var parsedValue = rowParser.Item2(sourceColumns[cIndex]);
+                        parsedColumns.Add(rowParser.Item1.Name, parsedValue);
+                        var valueError = parsedValue.GetError();
+                        if (valueError != null)
+                        {
+                            error += valueError;
+                        }
                     }
                     
                 }
@@ -101,7 +110,7 @@ namespace FileReader
                 {
                 }
                 var error = "";
-                if (int.TryParse(source.ToString(), out var value))
+                if (!int.TryParse(source.ToString(), out var value))
                 {
                     error = "Could not parse integer";
                 }
@@ -126,10 +135,16 @@ namespace FileReader
                 return this.Value;
             }
 
-            public string ToString(string format)
+            public virtual string ToString(string format)
             {
                 return Value?.ToString();
             }
+
+            public override string ToString()
+            {
+                return this.ToString(null);
+            }
+
             public string GetError()
             {
                 return this.Error;
@@ -155,6 +170,7 @@ namespace FileReader
             public string Error { get; }
             public long RowNumber { get; }
             public long RawLineNumber { get; }
+            public IValue this[string key] => this.Columns[key];
         }
         
     }

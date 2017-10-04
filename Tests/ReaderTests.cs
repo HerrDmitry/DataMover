@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     [TestClass]
-    public class UnitTest1
+    public class ReaderTests :TestBase
     {
         [TestMethod]
         public void CsvReadTest1()
@@ -61,15 +61,5 @@ namespace Tests
             row = reader();
             Assert.IsNull(row);
         }
-        private MemoryStream GetStreamFromString(string s)
-        {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-            writer.Write(s);
-            writer.Flush();
-            stream.Position = 0;
-            return stream;
-        }
-
     }
 }

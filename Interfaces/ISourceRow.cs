@@ -10,5 +10,6 @@ namespace Interfaces
         string Error { get; }
         long RowNumber { get; }
         long RawLineNumber { get; }
+        IValue this[string key] { get; }
     }
 }
