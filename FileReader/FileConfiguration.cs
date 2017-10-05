@@ -7,6 +7,7 @@ namespace FileReader
     public class FileConfiguration:IFile
     {
         public string Name { get; set; }
+        public string NullValue { get; set; }
         public IList<IRecord> Records { get; set; }
 
         public FileConfiguration()
@@ -30,5 +31,11 @@ namespace FileReader
             public string Format { get; set; }
             public ColumnType Type { get; set; }
         }
+    }
+
+    public class CsvFileConfiguration : FileConfiguration, ICsvFile
+    {
+        public string Delimiter { get; set; }
+        public string Qualifier { get; set; }
     }
 }

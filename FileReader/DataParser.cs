@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Interfaces;
 using Interfaces.FileDefinition;
@@ -10,18 +11,17 @@ namespace FileReader
 {
     public static partial class Readers
     {
-        public static Func<ISourceRow> ParseData(this Func<Func<StringBuilder>> reader, Func<string, object> getValue)
+        public static Func<ISourceRow> ParseData(this Func<Func<StringBuilder>> readerFunc, Func<string, object> getValueFunc)
         {
-            if (getValue == null)
+            if (getValueFunc == null)
             {
-                throw new ArgumentNullException("getValue cannot be null");
+                throw new ArgumentNullException(Localization.GetLocalizationString("getValue cannot be null"));
             }
             long sourceLineNumber = 0;
             long rowNumber = 0;
-            var fileConfig = getValue("SourceConfiguration") as IFile;
-            if (fileConfig == null)
+            if (!(getValueFunc("SourceConfiguration") is IFile fileConfig))
             {
-                throw new ArgumentException("Could not get Source Configuration...");
+                throw new ArgumentException(Localization.GetLocalizationString("Could not get Source Configuration..."));
             }
             var parsers = new List<Tuple<IRecord,List<Tuple<IColumn,Func<StringBuilder, IValue>>>>>();
             foreach (var record in fileConfig.Records)
@@ -42,7 +42,7 @@ namespace FileReader
                 var parsedColumns = new Dictionary<string, IValue>();
                 for (var rIndex = 0; rIndex < parsers.Count; rIndex++)
                 {
-                    var record = reader();
+                    var record = readerFunc();
                     if (record == null)
                     {
                         return row;
@@ -60,7 +60,7 @@ namespace FileReader
                     var rowParsers = parsers[rIndex];
                     if (sourceColumns.Count != rowParsers.Item2.Count)
                     {
-                        error=$"Cannot parse line {sourceLineNumber + lineNumber}, configuration does not match data source";
+                        error=string.Format(Localization.GetLocalizationString("Cannot parse line {0}, configuration does not match data source"),sourceLineNumber + lineNumber);
                         break;
                     }
 
@@ -72,7 +72,7 @@ namespace FileReader
                         var valueError = parsedValue.GetError();
                         if (valueError != null)
                         {
-                            error += valueError;
+                            error += $"{rowParser.Item1.Name}: {valueError}";
                         }
                     }
                     
@@ -90,7 +90,11 @@ namespace FileReader
             switch (type)
             {
                 case ColumnType.Integer:
-                    return GetIntegerParse(format);
+                    return GetIntegerParser(format);
+                case ColumnType.Decimal:
+                    return GetDecimalParser(format);
+                case ColumnType.Date:
+                    return GetDateTimeParser(format);
                 case ColumnType.String:
                 default:
                     return GetStringParser(format);
@@ -102,21 +106,90 @@ namespace FileReader
             return source => new ValueWrapper<string>(source.ToString(), null);
         }
 
-        private static Func<StringBuilder, IValue> GetIntegerParse(string format)
+        private static Func<StringBuilder, IValue> GetDateTimeParser(string format)
+        {
+            return source =>
+            {
+                DateTime value=default(DateTime);
+                var sourceStr = source.ToString();
+                var hasError = false;
+                if (!string.IsNullOrWhiteSpace(format))
+                {
+                    hasError = !DateTime.TryParseExact(sourceStr,
+                        format.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries),
+                        CultureInfo.InvariantCulture, DateTimeStyles.None, out value);
+                }
+                
+                if (!string.IsNullOrWhiteSpace(format) || hasError)
+                {
+                    hasError = !DateTime.TryParse(sourceStr, out value);
+                }
+
+                var error = hasError ? Localization.GetLocalizationString("Could not parse date") : null;
+                
+                
+                return new DateValueWrapper(value, error);
+            };
+        }
+
+        private static Func<StringBuilder, IValue> GetDecimalParser(string format)
+        {
+            return source =>
+            {
+                var dec = '.';
+                var neg = '-';
+                if (!string.IsNullOrWhiteSpace(format))
+                {
+                    dec = format[0];
+                }
+                var normalizedSource = new StringBuilder();
+                for (var i = 0; i < source.Length; i++)
+                {
+                    var c = source[i];
+                    if (c < '0' && c > '9' && c != dec && (c != neg || neg == 0))
+                    {
+                        continue;
+                    }
+                    neg = (char) 0;
+                    normalizedSource.Append(c);
+                }
+                string error = null;
+                if (!decimal.TryParse(normalizedSource.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture,
+                    out decimal value))
+                {
+                    error = Localization.GetLocalizationString("Could not parse decimal");
+                }
+                return new ValueWrapper<decimal>(value, error);
+            };
+        }
+
+        private static Func<StringBuilder, IValue> GetIntegerParser(string format)
         {
             return source =>
             {
                 if (!string.IsNullOrWhiteSpace(format))
                 {
                 }
-                var error = "";
-                if (!int.TryParse(source.ToString(), out var value))
+                string error = null;
+                if (!long.TryParse(source.ToString(), out var value))
                 {
-                    error = "Could not parse integer";
+                    error = Localization.GetLocalizationString("Could not parse integer");
                 }
 
-                return new ValueWrapper<int>(value, error);
+                return new ValueWrapper<long>(value, error);
             };
+        }
+
+        private class DateValueWrapper : ValueWrapper<DateTime>
+        {
+            public DateValueWrapper(DateTime value, string error) : base(value, error)
+            {
+            }
+
+            public override string ToString(string format)
+            {
+                return this.GetValue().ToString(format);
+            }
         }
 
         private class ValueWrapper<T>:IValue<T>

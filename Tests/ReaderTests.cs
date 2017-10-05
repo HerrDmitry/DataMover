@@ -16,10 +16,8 @@ namespace Tests
             {
                 switch (key)
                 {
-                    case "delimiter":
-                        return ',';
-                    case "qualifier":
-                        return '\'';
+                    case "SourceConfiguration":
+                        return new CsvFileConfiguration{Delimiter = ",",Qualifier = "\'"};
                     default:
                         return null;
                 }
@@ -39,10 +37,8 @@ namespace Tests
             {
                 switch (key)
                 {
-                    case "delimiter":
-                        return ',';
-                    case "qualifier":
-                        return '\'';
+                    case "SourceConfiguration":
+                        return new CsvFileConfiguration{Delimiter = ",",Qualifier = "\'"};
                     default:
                         return null;
                 }
@@ -60,6 +56,28 @@ namespace Tests
             Assert.AreEqual("f", row().ToString());
             row = reader();
             Assert.IsNull(row);
+        }
+
+        [TestMethod]
+        public void CsvReadTest3()
+        {
+            var s = "'a''b',,'c'\n'd','e\ne',f";
+            var reader = GetStreamFromString(s).CsvReader(key =>
+            {
+                switch (key)
+                {
+                    case "SourceConfiguration":
+                        return new CsvFileConfiguration{Delimiter = ",",Qualifier = "\'"};
+                    default:
+                        return null;
+                }
+            });
+            Assert.IsNotNull(reader);
+            var row = reader();
+            Assert.IsNotNull(row);
+            Assert.AreEqual("a'b", row().ToString());
+            Assert.IsNull(row());
+            Assert.AreEqual("c", row().ToString());
         }
     }
 }

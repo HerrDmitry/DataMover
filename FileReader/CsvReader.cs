@@ -3,29 +3,39 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Interfaces;
+using Interfaces.FileDefinition;
 
 namespace FileReader
 {
     public static partial class Readers
     {
-        public static Func<Func<StringBuilder>> CsvReader(this Stream stream, Func<string, object> getValue)
+        public static Func<Func<StringBuilder>> CsvReader(this Stream stream, Func<string, object> getValueFunc)
         {
-            return new StreamReader(stream).CsvReader(getValue);
+            return new StreamReader(stream).CsvReader(getValueFunc);
         }
 
-        public static Func<Func<StringBuilder>> CsvReader(this StreamReader stream, Func<string,object> getValue)
+        public static Func<Func<StringBuilder>> CsvReader(this StreamReader stream, Func<string,object> getValueFunc)
         {
             var readNext=stream.BufferedRead();
-            var d = getValue("delimiter") as char?;
-            var q = getValue("qualifier") as char?;
-            var delimiter = d ?? ',';
-            var qualifier = q ?? '"';
+            if (!(getValueFunc("SourceConfiguration") is ICsvFile fileConfig))
+            {
+                throw new ArgumentException(Localization.GetLocalizationString("Could not get Source Configuration..."));
+            }
+
+            var nullValue = string.IsNullOrWhiteSpace(fileConfig.NullValue) ? "" : fileConfig.NullValue;
+            var delimiter = string.IsNullOrWhiteSpace(fileConfig.Delimiter)?',':fileConfig.Delimiter[0];
+            var qualifier = string.IsNullOrWhiteSpace(fileConfig.Qualifier) ? '"' : fileConfig.Qualifier[0];
+
             var locker = new object();
             return () =>
             {
                 lock (locker)
                 {
                     var columns = new Queue<StringBuilder>();
+                    Action<StringBuilder> enqueue = clmn =>
+                    {
+                        columns.Enqueue(clmn.Length > 0 ? clmn : null);
+                    };
                     int c;
                     while ((c = readNext()) >= 0 && (c == '\n' || c == '\r')) ;
                     if (c < 0)
@@ -47,13 +57,13 @@ namespace FileReader
                         else
                         if (c == delimiter && !isQualified)
                         {
-                            columns.Enqueue(column);
+                            enqueue(column);
                             column = new StringBuilder();
                         }
                         else
                         if ((c == '\n' || c == '\r') && !isQualified)
                         {
-                            columns.Enqueue(column);
+                            enqueue(column);
                             column = null;
                             break;
                         }
@@ -65,7 +75,7 @@ namespace FileReader
                     }
                     if (c == -1 && column != null)
                     {
-                        columns.Enqueue(column);
+                        enqueue(column);
                     }
 
                     return () => columns.Count>0?columns.Dequeue():null;
