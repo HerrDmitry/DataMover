@@ -1,35 +1,29 @@
 ﻿using System.IO;
 using FileReader;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Tests;
 
 namespace DataMoverTests
 {
     [TestClass]
-    public class ReaderTests
+    public class ReaderTests: TestBase
     {
         [TestMethod]
         public void CsvReadTest()
         {
             var s = "'a','b','c'";
             var stream = GetStreamFromString(s);
-            var reader = stream.CsvReader((string key) =>
+            var reader = stream.CsvReader(() => new Importer.Configuration.File
             {
-                switch (key)
-                {
-                    case "delimiter":
-                        return ',';
-                    case "qualifier":
-                        return '\'';
-                    default:
-                        return null;
-                }
-            });
+                Delimiter = ",",
+                Qualifier = "'"
+            },()=>new TestBase.ConsoleLogger());
             Assert.IsNotNull(reader);
             var row = reader();
             Assert.IsNotNull(row);
-            Assert.AreEqual("a",row().ToString());
-            Assert.AreEqual("b",row().ToString());
-            Assert.AreEqual("c",row().ToString());
+            Assert.AreEqual("a",row[0].ToString());
+            Assert.AreEqual("b",row[1].ToString());
+            Assert.AreEqual("c",row[2].ToString());
         }
         private MemoryStream GetStreamFromString(string s)
         {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Interfaces
 {
-    public interface ISourceRow
+    public interface IDataRow
     {
         IDictionary<string, IValue> Columns { get; }
         string Error { get; }

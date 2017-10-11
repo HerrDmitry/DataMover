@@ -1,8 +1,10 @@
-﻿namespace Interfaces
+﻿using Interfaces.Configuration;
+
+namespace Interfaces
 {
     public interface IContext
     {
-        IConfiguration config { get; }
-        ILog log { get; }
+        IConfiguration Config { get; }
+        ILog Log { get; }
     }
 }

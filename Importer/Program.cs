@@ -1,13 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using FileReader;
+using Interfaces;
 
 namespace Importer
 {
     class Program
     {
         static void Main(string[] args)
+        {
+            if (args.Length > 0)
+            {
+                if (File.Exists(args[0]))
+                {
+                    Runner.RunImport(args[0]);
+                }
+            }
+            Test(args);
+        }
+
+        static void Test(string[] args)
         {
             Func<StreamReader, Func<int>> read = (r) =>
             {
@@ -78,28 +92,22 @@ namespace Importer
             Console.WriteLine(watch.ElapsedMilliseconds);
             watch=Stopwatch.StartNew();
             reader = new StreamReader(File.Open(args[0],FileMode.Open,FileAccess.Read,FileShare.Read));
-            var nextRow = reader.CsvReader(key =>
+            var nextRow = reader.CsvReader(() => new Configuration.File()
             {
-                switch (key)
-                {
-                    case "delimiter":
-                        return ',';
-                    case "qualifier":
-                        return '\'';
-                    default:
-                        return null;
-                }
-            });
+                Delimiter = ";",
+                Qualifier = "\""
+            },()=>null);
             var rows = 0;
-            var nextColumn = nextRow();
-            while (nextColumn != null)
+            IReadOnlyList<ISourceField> record;
+            long colCount = 0;
+            while ((record = nextRow()) != null)
             {
                 rows++;
-                while (nextColumn() != null) ;
-                nextColumn = nextRow();
+                colCount += record.Count;
             }
             watch.Stop();
             Console.WriteLine(rows);
+            Console.WriteLine(colCount);
             Console.WriteLine(watch.ElapsedMilliseconds);
             Console.WriteLine("Hello World!");
             

@@ -4,6 +4,6 @@ namespace Interfaces
 {
     public interface IFileReader
     {
-        IEnumerable<ISourceRow> Read(IEnumerable<IRawLine> lines, IContext context);
+        IEnumerable<IDataRow> Read(IEnumerable<IRawLine> lines, IContext context);
     }
 }

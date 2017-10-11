@@ -4,8 +4,8 @@ using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using FileReader;
+using Importer.Configuration;
 using Interfaces;
-using Interfaces.FileDefinition;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -16,12 +16,12 @@ namespace Tests
         [TestMethod]
         public void WriteTest()
         {
-            Func<ISourceRow> RowFunc()
+            Func<IDataRow> RowFunc()
             {
-                var rows = new List<ISourceRow>
+                var rows = new List<IDataRow>
                 {
-                    new SourceRow{Columns = new Dictionary<string, IValue>{{"A", new IntegerValue(123)},{"B", new DateValue(new DateTime(2017,10,05))}}},
-                    new SourceRow{Columns = new Dictionary<string, IValue>{{"A", new IntegerValue(321)},{"B", new DateValue(new DateTime(2017,10,06))}}}
+                    new DataRow{Columns = new Dictionary<string, IValue>{{"A", new IntegerValue(123)},{"B", new DateValue(new DateTime(2017,10,05))}}},
+                    new DataRow{Columns = new Dictionary<string, IValue>{{"A", new IntegerValue(321)},{"B", new DateValue(new DateTime(2017,10,06))}}}
                 };
 
                 var index = 0;
@@ -33,18 +33,18 @@ namespace Tests
             {
                 if (key == "TargetConfiguration")
                 {
-                    return new CsvFileConfiguration
+                    return new Importer.Configuration.File
                     {
                         Delimiter = ",",
                         Qualifier = "\"",
-                        Records = new List<IRecord>
+                        RowsInternal = new List<Row>
                         {
-                            new FileConfiguration.FileRecordConfiguration
+                            new Row()
                             {
-                                Columns = new List<IColumn>
+                                ColumnsInternal = new List<Column>
                                 {
-                                    new FileConfiguration.FileColumnConfiguration{Name = "A",Type = ColumnType.Integer},
-                                    new FileConfiguration.FileColumnConfiguration{Name = "B",Type = ColumnType.Date,Format = "ddMMyyyy"}
+                                    new Column{Name = "A",Type = ColumnType.Integer},
+                                    new Column{Name = "B",Type = ColumnType.Date,Format = "ddMMyyyy"}
                                 }
                             }
                         }
@@ -61,7 +61,7 @@ namespace Tests
             Assert.AreEqual("\"123\",\"05102017\"\n\"321\",\"06102017\"\n",myStr);
         }
 
-        private class SourceRow : ISourceRow
+        private class DataRow : IDataRow
         {
             public IDictionary<string, IValue> Columns { get; set; }
             public string Error { get; set; }
@@ -109,10 +109,11 @@ namespace Tests
             private readonly T value;
             private readonly string error;
 
-            protected Value(T value, string error = null)
+            protected Value(T value, string error = null, bool isNull=false)
             {
                 this.value = value;
                 this.error = error;
+                this.IsNull = isNull;
             }
 
             public T GetValue()
@@ -131,6 +132,8 @@ namespace Tests
             {
                 return this.error;
             }
+            
+            public bool IsNull { get; }
         }
     }
 }

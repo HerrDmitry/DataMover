@@ -1,15 +1,15 @@
 ﻿using System;
 using System.IO;
 using Interfaces;
-using Interfaces.FileDefinition;
+using Interfaces.Configuration;
 
 namespace FileReader
 {
     public static partial class Writers
     {
-        public static void WriteCsv(this Func<ISourceRow> nextRowFunc, Func<Stream> targetFunc, Func<string, object> getValueFunc)
+        public static void WriteCsv(this Func<IDataRow> nextRowFunc, Func<Stream> targetFunc, Func<string, object> getValueFunc)
         {
-            if (!(getValueFunc("TargetConfiguration") is ICsvFile fileConfig))
+            if (!(getValueFunc("TargetConfiguration") is IFile fileConfig))
             {
                 throw new ArgumentException(Localization.GetLocalizationString("Could not get Target Configuration..."));
             }
@@ -19,14 +19,14 @@ namespace FileReader
             var qualifier = string.IsNullOrWhiteSpace(fileConfig.Qualifier) ? '"' : fileConfig.Qualifier[0];
 
             var targetStream = new StreamWriter(targetFunc());
-            ISourceRow row;
+            IDataRow row;
             while ((row = nextRowFunc()) != null)
             {
                 if (!string.IsNullOrWhiteSpace(row.Error))
                 {
                     continue;
                 }
-                foreach (var r in fileConfig.Records)
+                foreach (var r in fileConfig.Rows)
                 {
                     var columns = r.Columns;
                     for (var c = 0; c < columns.Count; c++)

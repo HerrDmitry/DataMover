@@ -1,4 +1,4 @@
-﻿namespace Interfaces.FileDefinition
+﻿namespace Interfaces.Configuration
 {
     public interface IColumn
     {

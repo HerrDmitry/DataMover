@@ -5,57 +5,55 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Interfaces;
-using Interfaces.FileDefinition;
+using Interfaces.Configuration;
 
 namespace FileReader
 {
     public static partial class Readers
     {
-        public static Func<ISourceRow> ParseData(this Func<Func<StringBuilder>> readerFunc, Func<string, object> getValueFunc)
+        public static Func<IDataRow> ParseData(this Func<IReadOnlyList<ISourceField>> getLineFunc, Func<IFile> getFileConfigFunc, Func<Interfaces.ILog> getLoggerFunc)
         {
-            if (getValueFunc == null)
-            {
-                throw new ArgumentNullException(Localization.GetLocalizationString("getValue cannot be null"));
-            }
             long sourceLineNumber = 0;
             long rowNumber = 0;
-            if (!(getValueFunc("SourceConfiguration") is IFile fileConfig))
+            var fileConfig = getFileConfigFunc();
+            var logger = getLoggerFunc?.Invoke();
+            if (fileConfig==null)
             {
-                throw new ArgumentException(Localization.GetLocalizationString("Could not get Source Configuration..."));
+                var msg = Localization.GetLocalizationString("Could not get Source Configuration...");
+                logger?.Fatal(msg);
+                throw new ArgumentException(msg);
             }
-            var parsers = new List<Tuple<IRecord,List<Tuple<IColumn,Func<StringBuilder, IValue>>>>>();
-            foreach (var record in fileConfig.Records)
+            logger?.Info(string.Format(Localization.GetLocalizationString("Parsing data from {0}"),fileConfig.Name));
+            var parsers = new List<Tuple<IRow,List<Tuple<IColumn,Func<ISourceField, IValue>>>>>();
+            foreach (var record in fileConfig.Rows)
             {
-                var recordParsers = new Tuple<IRecord, List<Tuple<IColumn, Func<StringBuilder, IValue>>>>(record,
-                    new List<Tuple<IColumn, Func<StringBuilder, IValue>>>());
+                var recordParsers = new Tuple<IRow, List<Tuple<IColumn, Func<ISourceField, IValue>>>>(record,
+                    new List<Tuple<IColumn, Func<ISourceField, IValue>>>());
                 parsers.Add(recordParsers);
                 recordParsers.Item2.AddRange(record.Columns.Select(column =>
-                    new Tuple<IColumn, Func<StringBuilder, IValue>>(column,
+                    new Tuple<IColumn, Func<ISourceField, IValue>>(column,
                         GetValueParser(column.Type, column.Format))));
             }
             var currentRecord = 0;
             return () =>
             {
                 int lineNumber = 0;
-                SourceRow row = null;
+                DataRow row = null;
                 string error = "";
                 var parsedColumns = new Dictionary<string, IValue>();
                 for (var rIndex = 0; rIndex < parsers.Count; rIndex++)
                 {
-                    var record = readerFunc();
-                    if (record == null)
+                    var sourceColumns = getLineFunc();
+                    if (sourceColumns == null)
                     {
+                        if (row == null)
+                        {
+                            logger?.Info(string.Format(Localization.GetLocalizationString("Loaded {0} records from {1}"),lineNumber,fileConfig.Name));
+                        }
                         return row;
                     }
 
                     lineNumber++;
-                    
-                    var sourceColumns = new List<StringBuilder>();
-                    StringBuilder column;
-                    while ((column = record()) != null)
-                    {
-                        sourceColumns.Add(column);
-                    }
 
                     var rowParsers = parsers[rIndex];
                     if (sourceColumns.Count != rowParsers.Item2.Count)
@@ -75,17 +73,16 @@ namespace FileReader
                             error += $"{rowParser.Item1.Name}: {valueError}";
                         }
                     }
-                    
                 }
                 
-                row=new SourceRow(parsedColumns,error,currentRecord++,sourceLineNumber);
+                row=new DataRow(parsedColumns,error,currentRecord++,sourceLineNumber);
 
                 sourceLineNumber += lineNumber;
                 return row;
             };
         }
 
-        private static Func<StringBuilder, IValue> GetValueParser(this ColumnType type, string format)
+        private static Func<ISourceField, IValue> GetValueParser(this ColumnType type, string format)
         {
             switch (type)
             {
@@ -101,16 +98,20 @@ namespace FileReader
             }
         }
 
-        private static Func<StringBuilder, IValue> GetStringParser(string format)
+        private static Func<ISourceField, IValue> GetStringParser(string format)
         {
-            return source => new ValueWrapper<string>(source.ToString(), null);
+            return source => new ValueWrapper<string>(source.Source, null, source.Source==null);
         }
 
-        private static Func<StringBuilder, IValue> GetDateTimeParser(string format)
+        private static Func<ISourceField, IValue> GetDateTimeParser(string format)
         {
             return source =>
             {
-                DateTime value=default(DateTime);
+                if (source?.Source == null)
+                {
+                    return new DateValueWrapper(DateTime.MinValue, null, true);
+                }
+                DateTime value = default(DateTime);
                 var sourceStr = source.ToString();
                 var hasError = false;
                 if (!string.IsNullOrWhiteSpace(format))
@@ -119,23 +120,27 @@ namespace FileReader
                         format.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries),
                         CultureInfo.InvariantCulture, DateTimeStyles.None, out value);
                 }
-                
+
                 if (!string.IsNullOrWhiteSpace(format) || hasError)
                 {
                     hasError = !DateTime.TryParse(sourceStr, out value);
                 }
 
                 var error = hasError ? Localization.GetLocalizationString("Could not parse date") : null;
-                
-                
-                return new DateValueWrapper(value, error);
+
+
+                return new DateValueWrapper(value, error, false);
             };
         }
 
-        private static Func<StringBuilder, IValue> GetDecimalParser(string format)
+        private static Func<ISourceField, IValue> GetDecimalParser(string format)
         {
             return source =>
             {
+                if (source?.Source == null)
+                {
+                    return new ValueWrapper<decimal>(0,null,true);
+                }
                 var dec = '.';
                 var neg = '-';
                 if (!string.IsNullOrWhiteSpace(format))
@@ -143,9 +148,9 @@ namespace FileReader
                     dec = format[0];
                 }
                 var normalizedSource = new StringBuilder();
-                for (var i = 0; i < source.Length; i++)
+                for (var i = 0; i < source.Source.Length; i++)
                 {
-                    var c = source[i];
+                    var c = source.Source[i];
                     if (c < '0' && c > '9' && c != dec && (c != neg || neg == 0))
                     {
                         continue;
@@ -159,14 +164,18 @@ namespace FileReader
                 {
                     error = Localization.GetLocalizationString("Could not parse decimal");
                 }
-                return new ValueWrapper<decimal>(value, error);
+                return new ValueWrapper<decimal>(value, error, false);
             };
         }
 
-        private static Func<StringBuilder, IValue> GetIntegerParser(string format)
+        private static Func<ISourceField, IValue> GetIntegerParser(string format)
         {
             return source =>
             {
+                if (source?.Source == null)
+                {
+                    return new ValueWrapper<long>(0, null, true);
+                }
                 if (!string.IsNullOrWhiteSpace(format))
                 {
                 }
@@ -176,13 +185,13 @@ namespace FileReader
                     error = Localization.GetLocalizationString("Could not parse integer");
                 }
 
-                return new ValueWrapper<long>(value, error);
+                return new ValueWrapper<long>(value, error, false);
             };
         }
 
         private class DateValueWrapper : ValueWrapper<DateTime>
         {
-            public DateValueWrapper(DateTime value, string error) : base(value, error)
+            public DateValueWrapper(DateTime value, string error, bool isNull) : base(value, error, isNull)
             {
             }
 
@@ -194,10 +203,12 @@ namespace FileReader
 
         private class ValueWrapper<T>:IValue<T>
         {
-            public ValueWrapper(T value, string error)
+            public ValueWrapper(T value, string error, bool isNull)
             {
                 this.Value = value;
                 this.Error = error;
+                this.IsNull = isNull;
+
             }
 
             private readonly T Value;
@@ -222,15 +233,17 @@ namespace FileReader
             {
                 return this.Error;
             }
+
+            public bool IsNull { get; }
         }
         
-        private class SourceRow : ISourceRow
+        private class DataRow : IDataRow
         {
-            public SourceRow(string error, long rowNumber, long rawLineNumber):this(null,error,rowNumber,rawLineNumber)
+            public DataRow(string error, long rowNumber, long rawLineNumber):this(null,error,rowNumber,rawLineNumber)
             {
             }
 
-            public SourceRow(IDictionary<string, IValue> columns, string error, long rowNumber,
+            public DataRow(IDictionary<string, IValue> columns, string error, long rowNumber,
                 long rawLineNumber)
             {
                 this.Columns = columns;

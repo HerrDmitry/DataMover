@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using FileReader;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,48 +13,40 @@ namespace Tests
         {
             var s = "'a','b','c'";
             var stream = GetStreamFromString(s);
-            var reader = stream.CsvReader(key =>
+            var reader = stream.CsvReader(() => new Importer.Configuration.File
             {
-                switch (key)
-                {
-                    case "SourceConfiguration":
-                        return new CsvFileConfiguration{Delimiter = ",",Qualifier = "\'"};
-                    default:
-                        return null;
-                }
-            });
+                Delimiter = ",",
+                Qualifier = "'",
+                Name="Test"
+            },()=>new ConsoleLogger());
             Assert.IsNotNull(reader);
             var row = reader();
             Assert.IsNotNull(row);
-            Assert.AreEqual("a", row().ToString());
-            Assert.AreEqual("b", row().ToString());
-            Assert.AreEqual("c", row().ToString());
+            Assert.AreEqual("a", row[0].ToString());
+            Assert.AreEqual("b", row[1].ToString());
+            Assert.AreEqual("c", row[2].ToString());
+            Assert.IsNull(reader());
         }
         [TestMethod]
         public void CsvReadTest2()
         {
             var s = "'a''b','b','c'\n'd','e\ne',f";
-            var reader = GetStreamFromString(s).CsvReader(key =>
+            var reader = GetStreamFromString(s).CsvReader(() => new Importer.Configuration.File
             {
-                switch (key)
-                {
-                    case "SourceConfiguration":
-                        return new CsvFileConfiguration{Delimiter = ",",Qualifier = "\'"};
-                    default:
-                        return null;
-                }
-            });
+                Delimiter = ",",
+                Qualifier = "'"
+            },()=>new ConsoleLogger());
             Assert.IsNotNull(reader);
             var row = reader();
             Assert.IsNotNull(row);
-            Assert.AreEqual("a'b", row().ToString());
-            Assert.AreEqual("b", row().ToString());
-            Assert.AreEqual("c", row().ToString());
+            Assert.AreEqual("a'b", row[0].ToString());
+            Assert.AreEqual("b", row[1].ToString());
+            Assert.AreEqual("c", row[2].ToString());
             row = reader();
             Assert.IsNotNull(row);
-            Assert.AreEqual("d", row().ToString());
-            Assert.AreEqual("e\ne", row().ToString());
-            Assert.AreEqual("f", row().ToString());
+            Assert.AreEqual("d", row[0].ToString());
+            Assert.AreEqual("e\ne", row[1].ToString());
+            Assert.AreEqual("f", row[2].ToString());
             row = reader();
             Assert.IsNull(row);
         }
@@ -62,22 +55,17 @@ namespace Tests
         public void CsvReadTest3()
         {
             var s = "'a''b',,'c'\n'd','e\ne',f";
-            var reader = GetStreamFromString(s).CsvReader(key =>
+            var reader = GetStreamFromString(s).CsvReader(() => new Importer.Configuration.File
             {
-                switch (key)
-                {
-                    case "SourceConfiguration":
-                        return new CsvFileConfiguration{Delimiter = ",",Qualifier = "\'"};
-                    default:
-                        return null;
-                }
-            });
+                Delimiter = ",",
+                Qualifier = "'"
+            },()=>new ConsoleLogger());
             Assert.IsNotNull(reader);
             var row = reader();
             Assert.IsNotNull(row);
-            Assert.AreEqual("a'b", row().ToString());
-            Assert.IsNull(row());
-            Assert.AreEqual("c", row().ToString());
+            Assert.AreEqual("a'b", row[0].ToString());
+            Assert.IsTrue(row[1].Source==null);
+            Assert.AreEqual("c", row[2].ToString());
         }
     }
 }

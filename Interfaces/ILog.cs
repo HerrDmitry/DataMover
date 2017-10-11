@@ -1,10 +1,13 @@
-﻿namespace Interfaces
+﻿using System;
+
+namespace Interfaces
 {
     public interface ILog
     {
-        void Error(string message);
-        void Warning(string message);
-        void Info(string message);
-        void Fatal(string message);
+        Action<string> Error { get; }
+        Action<string> Warning { get; }
+        Action<string> Info { get; }
+        Action<string> Fatal { get; }
+        Action<string> Debug { get; }
     }
 }
