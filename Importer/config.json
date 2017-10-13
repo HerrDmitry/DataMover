@@ -27,7 +27,10 @@
             {"name": "selector","type": "string"},
             {"name": "id1","type": "string"},
             {"name": "id2","type": "string"},
-            {"name": "id3","type": "string"}
+            {"name": "id3","type": "string"},
+            {"name":"itemNo","type":"integer"},
+            {"name":"itemId1","type":"string"},
+            {"name":"itemId2","type":"string"}
           ],
           "filter":[{"name":"selector","value":"DTL"}]
         },{
@@ -86,7 +89,7 @@
       "media":"local",
       "delimiter":",",
             "rows":[{
-        "columns":[{"name":"id1"},{"name":"id2"},{"name":"id3"}],
+        "columns":[{"name":"id1"},{"name":"id2"},{"name":"id3"},{"name":"itemNo"},{"name":"itemId1"},{"name":"itemId2"}],
       "filter":[{"name":"selector","value":"DTL"}]
       }],
     },

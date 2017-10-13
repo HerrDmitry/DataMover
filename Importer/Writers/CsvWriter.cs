@@ -33,7 +33,7 @@ namespace Importer.Writers
                     {
                         var value = row[columns[c].Name];
                         var valueString = value != null ? value.ToString(columns[c].Format) : nullValue;
-                        var needsQualifier = valueString.Contains(qualifier);
+                        var needsQualifier = valueString?.Contains(qualifier)==true;
                         if (needsQualifier)
                         {
                             stream.Write(qualifier);
