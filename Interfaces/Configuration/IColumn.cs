@@ -1,4 +1,6 @@
-﻿namespace Interfaces.Configuration
+﻿using System.Collections.Generic;
+
+namespace Interfaces.Configuration
 {
     public interface IColumn
     {

@@ -1,6 +1,8 @@
 using System.IO;
 using System.Threading;
 using FileReader;
+using Importer;
+using Importer.Readers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests

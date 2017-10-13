@@ -5,7 +5,7 @@ using System.Text;
 using Interfaces;
 using Interfaces.Configuration;
 
-namespace FileReader
+namespace Importer.Readers
 {
     public static partial class Readers
     {
@@ -24,7 +24,7 @@ namespace FileReader
                 logger?.Fatal(msg);
                 throw new ArgumentException(msg);
             }
-            var readNext=stream.BufferedRead();
+            var readNext=stream.BufferedRead(logger);
 
             var nullValue = string.IsNullOrWhiteSpace(fileConfig.NullValue) ? "" : fileConfig.NullValue;
             var delimiter = string.IsNullOrWhiteSpace(fileConfig.Delimiter) ? ',' : fileConfig.Delimiter[0];

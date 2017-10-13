@@ -20,19 +20,18 @@ namespace Importer.Configuration
         public string Password { get; set; }
         [JsonProperty("path")]
         public string Path { get; set; }
-
         [JsonProperty("includeSubfolders")]
         public bool IncludeSubfolders { get; }
-
+        [JsonProperty("append")]
+        public bool AppendToExisting { get; }
         [JsonProperty("name")]
         public string Name { get; set; }
         [JsonProperty("null")]
         public string NullValue { get; set; }
         [JsonProperty("format")]
-        public string Format { get; set; }
+        public FileFormat Format { get; set; }
         [JsonIgnore]
         public IList<IRow> Rows { get; private set; }
-
         [JsonProperty("rows")]
         public List<Row> RowsInternal {
             set => this.Rows = value?.Cast<IRow>().ToList();

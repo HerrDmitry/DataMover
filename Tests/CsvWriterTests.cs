@@ -5,6 +5,7 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using FileReader;
 using Importer.Configuration;
+using Importer.Writers;
 using Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

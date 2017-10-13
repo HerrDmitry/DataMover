@@ -1,4 +1,5 @@
-﻿using Interfaces;
+﻿using System.Collections.Generic;
+using Interfaces;
 using Interfaces.Configuration;
 using Newtonsoft.Json;
 

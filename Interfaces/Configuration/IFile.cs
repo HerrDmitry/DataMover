@@ -5,7 +5,7 @@ namespace Interfaces.Configuration
     public interface IFile:ICsvFile,IFileMedia
     {
         string Name { get; }
-        string Format { get; }
+        FileFormat Format { get; }
         IList<IRow> Rows { get; }
     }
 
@@ -22,6 +22,7 @@ namespace Interfaces.Configuration
         string Password { get; }
         string Path { get; }
         bool IncludeSubfolders { get; }
+        bool AppendToExisting { get; }
     }
 
     public interface IHasNullableColumns

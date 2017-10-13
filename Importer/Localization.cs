@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FileReader
+namespace Importer
 {
     public static class Localization
     {

@@ -4,10 +4,11 @@ using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Importer.Configuration;
 using Interfaces;
 using Interfaces.Configuration;
 
-namespace FileReader
+namespace Importer.Readers
 {
     public static partial class Readers
     {
@@ -24,77 +25,53 @@ namespace FileReader
                 throw new ArgumentException(msg);
             }
             logger?.Info(string.Format(Localization.GetLocalizationString("Parsing data from {0}"),fileConfig.Name));
-            var parsers = new List<Tuple<IRow,List<Tuple<IColumn,Func<ISourceField, IValue>>>>>();
-            foreach (var record in fileConfig.Rows)
-            {
-                var recordParsers = new Tuple<IRow, List<Tuple<IColumn, Func<ISourceField, IValue>>>>(record,
-                    new List<Tuple<IColumn, Func<ISourceField, IValue>>>());
-                parsers.Add(recordParsers);
-                recordParsers.Item2.AddRange(record.Columns.Select(column =>
-                    new Tuple<IColumn, Func<ISourceField, IValue>>(column,
-                        GetValueParser(column.Type, column.Format))));
-            }
-            var currentRecord = 0;
+            var parsers = fileConfig.Rows.GetRowParsers();
+            var currentRecord = (long) 0;
+            var parsedRecords = (long) 0;
             return () =>
             {
-                int lineNumber = 0;
-                DataRow row = null;
-                string error = "";
-                var parsedColumns = new Dictionary<string, IValue>();
-                for (var rIndex = 0; rIndex < parsers.Count; rIndex++)
+                var line = getLineFunc();
+                if (line != null)
                 {
-                    var sourceColumns = getLineFunc();
-                    if (sourceColumns == null)
+                    currentRecord++;
+                    var row = parsers(line, currentRecord, currentRecord);
+                    if (row != null)
                     {
-                        if (row == null)
-                        {
-                            logger?.Info(string.Format(Localization.GetLocalizationString("Loaded {0} records from {1}"),lineNumber,fileConfig.Name));
-                        }
+                        parsedRecords++;
                         return row;
                     }
 
-                    lineNumber++;
 
-                    var rowParsers = parsers[rIndex];
-                    if (sourceColumns.Count != rowParsers.Item2.Count)
-                    {
-                        error=string.Format(Localization.GetLocalizationString("Cannot parse line {0}, configuration does not match data source"),sourceLineNumber + lineNumber);
-                        break;
-                    }
-
-                    for (var cIndex = 0; cIndex < rowParsers.Item2.Count; cIndex++)
-                    {
-                        var rowParser = rowParsers.Item2[cIndex];
-                        var parsedValue = rowParser.Item2(sourceColumns[cIndex]);
-                        parsedColumns.Add(rowParser.Item1.Name, parsedValue);
-                        var valueError = parsedValue.GetError();
-                        if (valueError != null)
+                    return new DataRow(
+                        new Dictionary<string, IValue>
                         {
-                            error += $"{rowParser.Item1.Name}: {valueError}";
-                        }
-                    }
+                            {
+                                "raw",
+                                new ValueWrapper<string>(string.Join(",", line.Select(x => x.Source)),
+                                    Localization.GetLocalizationString("Parse error"), true)
+                            }
+                        },
+                        Localization.GetLocalizationString("Could not parse line."), currentRecord, currentRecord);
                 }
                 
-                row=new DataRow(parsedColumns,error,currentRecord++,sourceLineNumber);
-
-                sourceLineNumber += lineNumber;
-                return row;
+                logger?.Info(string.Format(Localization.GetLocalizationString("Parsed {0}/{1} records from {2}"),parsedRecords,currentRecord,fileConfig.Name));
+                return null;
             };
         }
 
-        private static Func<ISourceField, IValue> GetValueParser(this ColumnType type, string format)
+        private static Func<ISourceField, IValue> GetValueParser(this IColumn column)
         {
-            switch (type)
+            switch (column.Type)
             {
                 case ColumnType.Integer:
-                    return GetIntegerParser(format);
+                    return GetIntegerParser(column.Format);
                 case ColumnType.Decimal:
-                    return GetDecimalParser(format);
+                    return GetDecimalParser(column.Format);
                 case ColumnType.Date:
-                    return GetDateTimeParser(format);
+                    return GetDateTimeParser(column.Format);
                 case ColumnType.String:
                 default:
-                    return GetStringParser(format);
+                    return GetStringParser(column.Format);
             }
         }
 
@@ -189,6 +166,40 @@ namespace FileReader
             };
         }
 
+        private static Func<IReadOnlyList<ISourceField>,long,long, IDataRow> GetRowParsers(this IList<IRow> rows)
+        {
+            var parsers= rows.Select(x => x.GetRowParser()).ToList();
+            return (source,rowNumber,rawLineNumber) =>
+            {
+                return parsers.Select(parser => parser(source,rowNumber,rawLineNumber)).FirstOrDefault(result => result != null);
+            };
+        }
+
+        private static Func<IReadOnlyList<ISourceField>,long,long, IDataRow> GetRowParser(this IRow row)
+        {
+            var filter = row.PrepareSourceFilter();
+            var parsers = row.Columns.Select(x=>x.GetValueParser()).ToList();
+
+            return (source,rowNumber,rawLineNumber) =>
+            {
+                if (!filter(source))
+                {
+                    return null;
+                }
+
+                var values = new Dictionary<string, IValue>();
+                var columnsCount = Math.Min(source.Count, parsers.Count);
+                var error = new StringBuilder();
+                for (var i = 0; i < columnsCount; i++)
+                {
+                    var value = parsers[i](source[i]);
+                    error.Append(value.GetError() ?? "");
+                    values[row.Columns[i].Name] = value;
+                }
+                return new DataRow(values, error.ToString(), rowNumber, rawLineNumber);
+            };
+        }
+
         private class DateValueWrapper : ValueWrapper<DateTime>
         {
             public DateValueWrapper(DateTime value, string error, bool isNull) : base(value, error, isNull)
@@ -258,6 +269,13 @@ namespace FileReader
             public long RawLineNumber { get; }
             public IValue this[string key] => this.Columns[key];
         }
-        
+
+        private class RowParser
+        {
+            public List<IColumn> Columns { get; }
+            public List<Func<ISourceField, IValue>> FieldParsers { get; }
+            public List<IFilter> Filters { get; }
+        }
+
     }
 }

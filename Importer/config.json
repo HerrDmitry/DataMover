@@ -2,8 +2,8 @@
   "sources": [
     {
       "name": "transactions",
-      "path": "transactions.txt",
-      "media": "ftp",
+      "path": "../../Data/transactions.txt",
+      "media": "local",
       "format": "csv",
       "delimiter": ",",
       "qualifier": "\"",
@@ -15,9 +15,53 @@
             {"name": "selector","type": "string"},
             {"name": "id1","type": "string"},
             {"name": "id2","type": "string"},
-            {"name": "id3","type": "string"}
+            {"name": "id3","type": "string"},
+            {"name":"f1"},
+            {"name":"f2"},
+            {"name":"n1",",type":"integer"},
+            {"name":"date", "type":"date", "format":"MMM dd yyyy hh:mmtt"}
           ],
           "filter":[{"name":"selector","value":"HDR"}]
+        },{
+          "columns": [
+            {"name": "selector","type": "string"},
+            {"name": "id1","type": "string"},
+            {"name": "id2","type": "string"},
+            {"name": "id3","type": "string"}
+          ],
+          "filter":[{"name":"selector","value":"DTL"}]
+        },{
+          "columns": [
+            {"name": "selector","type": "string"},
+            {"name": "id1","type": "string"},
+            {"name": "id2","type": "string"},
+            {"name": "id3","type": "string"}
+          ],
+          "filter":[{"name":"selector","value":"TAX"}]
+        },{
+          "columns": [
+            {"name": "selector","type": "string"},
+            {"name": "id1","type": "string"},
+            {"name": "id2","type": "string"},
+            {"name": "id3","type": "string"}
+          ],
+          "filter":[{"name":"selector","value":"MED"}]
+        },{
+          "columns": [
+            {"name": "selector","type": "string"},
+            {"name": "id1","type": "string"},
+            {"name": "id2","type": "string"},
+            {"name": "id3","type": "string"}
+          ],
+          "filter":[{"name":"selector","value":"DIS"}]
+        },{
+          "columns": [
+            {"name": "selector","type": "string"},
+            {"name": "id1","type": "string"},
+            {"name": "id2","type": "string"},
+            {"name": "id3","type": "string"}
+          ],
+          "filter":[{"name":"selector","value":"GFT"}]
         }
       ]
     }
@@ -25,33 +69,45 @@
   "targets":[
     {
       "name":"headers",
-      "path":"headers.txt",
+      "path":"../../Data/headers.txt",
       "format":"csv",
       "media":"local",
       "delimiter":",",
       "rows":[
         {
-          "columns":[{"name":"id1"},{"name":"id2"},{"name":"id3"}],
+          "columns":[{"name":"id1"},{"name":"id2"},{"name":"id3"},{"name":"date","format":"yyyy-MM-dd"}],
       "filter":[{"name":"selector","value":"HDR"}]}
       ]
     },
     {
       "name":"details",
-      "rows":[{
+      "path":"../../Data/details.txt",
+      "format":"csv",
+      "media":"local",
+      "delimiter":",",
+            "rows":[{
         "columns":[{"name":"id1"},{"name":"id2"},{"name":"id3"}],
       "filter":[{"name":"selector","value":"DTL"}]
       }],
     },
     {
       "name":"taxes",
-      "rows":[{
-        "columns":[{"name":"id1"},{"name":"id2"},{"name":"id3"}],
+      "path":"../../Data/taxes.txt",
+      "format":"csv",
+      "media":"local",
+      "delimiter":",",
+            "rows":[{
+        "columns":[{"name":"selector"},{"name":"id1"},{"name":"id2"},{"name":"id3"}],
         "filter":[{"name":"selector","value":"TAX"}]
       }]
     },
     {
       "name":"media",
-      "rows":[{"columns":[{"name":"id1"},{"name":"id2"},{"name":"id3"}],
+      "path":"../../Data/media.txt",
+      "format":"csv",
+      "media":"local",
+      "delimiter":",",
+            "rows":[{"columns":[{"name":"id1"},{"name":"id2"},{"name":"id3"}],
         "filter":[{"name":"selector","value":"MED"}]
       }]
     }
