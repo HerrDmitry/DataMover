@@ -33,7 +33,7 @@ namespace Importer.Writers
                     {
                         var value = row[columns[c].Name];
                         var valueString = value != null ? value.ToString(columns[c].Format) : nullValue;
-                        var needsQualifier = valueString?.Contains(qualifier)==true;
+                        var needsQualifier = value!=null && (valueString?.Contains(qualifier)==true || fileConfig.ForceQualifier);
                         if (needsQualifier)
                         {
                             stream.Write(qualifier);
@@ -55,46 +55,6 @@ namespace Importer.Writers
 
                 return rowCount;
             };
-        }
-
-        public static void WriteCsv(this Func<IDataRow> nextRowFunc, Func<Stream> targetFunc, Func<string, object> getValueFunc)
-        {
-            if (!(getValueFunc("TargetConfiguration") is IFile fileConfig))
-            {
-                throw new ArgumentException(Localization.GetLocalizationString("Could not get Target Configuration..."));
-            }
-
-            var nullValue = string.IsNullOrWhiteSpace(fileConfig.NullValue) ? "" : fileConfig.NullValue;
-            var delimiter = string.IsNullOrWhiteSpace(fileConfig.Delimiter)?',':fileConfig.Delimiter[0];
-            var qualifier = string.IsNullOrWhiteSpace(fileConfig.Qualifier) ? '"' : fileConfig.Qualifier[0];
-
-            var targetStream = new StreamWriter(targetFunc());
-            IDataRow row;
-            while ((row = nextRowFunc()) != null)
-            {
-                if (!string.IsNullOrWhiteSpace(row.Error))
-                {
-                    continue;
-                }
-                foreach (var r in fileConfig.Rows)
-                {
-                    var columns = r.Columns;
-                    for (var c = 0; c < columns.Count; c++)
-                    {
-                        var value = row[columns[c].Name];
-                        targetStream.Write(qualifier);
-                        targetStream.Write(value != null ? value.ToString(columns[c].Format) : nullValue);
-                        targetStream.Write(qualifier);
-                        if (columns.Count - 1 > c)
-                        {
-                            targetStream.Write(delimiter);
-                        }
-                    }
-                    
-                    targetStream.WriteLine();
-                }
-            }
-            targetStream.Flush();
         }
     }
 }

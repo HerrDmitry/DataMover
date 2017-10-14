@@ -12,6 +12,10 @@ namespace Importer.Configuration
         public string Delimiter { get; set; }
         [JsonProperty("qualifier")]
         public string Qualifier { get; set; }
+        [JsonProperty("forceQualifier")]
+        public bool ForceQualifier { get; set; }
+        [JsonProperty("hasLineDelimiters")]
+        public bool HasLineDelimiters { get; set; }
         [JsonProperty("media")]
         public MediaType MediaType { get; set; }
         [JsonProperty("login")]

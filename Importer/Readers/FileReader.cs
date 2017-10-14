@@ -60,12 +60,12 @@ namespace Importer.Readers
             {
                 while (sourceStream != null)
                 {
-                    var reader = readerFunc(sourceStream);
-                    sourceStream = sourceStreamFunc();
+                    var reader = readerFunc?.Invoke(sourceStream);
+                    sourceStream = sourceStreamFunc?.Invoke();
                     if (sourceStream == null)
                     {
                         source = nextSource();
-                        readerFunc = source.GetStreamReader(context.Log);
+                        readerFunc = source?.GetStreamReader(context.Log);
                         sourceStreamFunc = source?.GetSourceStream(context.Log);
                         sourceStream = sourceStreamFunc?.Invoke();
                     }
@@ -79,17 +79,20 @@ namespace Importer.Readers
             };
         }
 
-        private static Func<Stream,Func<IDataRow>> GetStreamReader(this IFile fileConfig, Interfaces.ILog logger)
+        private static Func<StreamReader, Func<IDataRow>> GetStreamReader(this IFile fileConfig, Interfaces.ILog logger)
         {
-            if (fileConfig?.Format == FileFormat.CSV)
+            switch (fileConfig.Format)
             {
-                return stream => stream?.CsvReader(() => fileConfig, () => logger).ParseData(() => fileConfig, () => logger);
+                case FileFormat.Fixed:
+                    return stream => stream?.BufferedRead(logger).FixedWidthReader(fileConfig, logger).ParseData(fileConfig, logger);
+                case FileFormat.CSV:
+                    return stream => stream?.BufferedRead(logger).CsvReader(fileConfig, logger).ParseData(fileConfig, logger);
+                default:
+                    return null;
             }
-
-            return null;
         }
 
-        private static Func<Stream> GetSourceStream(this IFileMedia mediaInfo, Interfaces.ILog logger)
+        private static Func<StreamReader> GetSourceStream(this IFileMedia mediaInfo, Interfaces.ILog logger)
         {
             logger?.Debug($"Getting source stream(s) for media \"{mediaInfo.MediaType}\" - \"{mediaInfo.Path}\"");
             switch (mediaInfo.MediaType)
@@ -112,7 +115,7 @@ namespace Importer.Readers
             return null;
         }
 
-        private static Stream GetLocalFileStream(this string filePath, Interfaces.ILog logger)
+        private static StreamReader GetLocalFileStream(this string filePath, Interfaces.ILog logger)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
@@ -121,7 +124,7 @@ namespace Importer.Readers
             
             logger.Debug(string.Format(Localization.GetLocalizationString("Opening source file \"{0}\""),
                 filePath));
-            return File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return new StreamReader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
         }
     }
 }

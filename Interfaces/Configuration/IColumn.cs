@@ -7,5 +7,6 @@ namespace Interfaces.Configuration
         string Name { get; }
         string Format { get; }
         ColumnType Type { get; }
+        int Width { get; }
     }
 }

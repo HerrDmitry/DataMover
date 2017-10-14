@@ -12,12 +12,10 @@ namespace Importer.Readers
 {
     public static partial class Readers
     {
-        public static Func<IDataRow> ParseData(this Func<IReadOnlyList<ISourceField>> getLineFunc, Func<IFile> getFileConfigFunc, Func<Interfaces.ILog> getLoggerFunc)
+        public static Func<IDataRow> ParseData(this Func<IReadOnlyList<ISourceField>> getLineFunc, IFile fileConfig, Interfaces.ILog logger)
         {
             long sourceLineNumber = 0;
             long rowNumber = 0;
-            var fileConfig = getFileConfigFunc();
-            var logger = getLoggerFunc?.Invoke();
             if (fileConfig==null)
             {
                 var msg = Localization.GetLocalizationString("Could not get Source Configuration...");
@@ -66,6 +64,7 @@ namespace Importer.Readers
                 case ColumnType.Integer:
                     return GetIntegerParser(column.Format);
                 case ColumnType.Decimal:
+                case ColumnType.Money:
                     return GetDecimalParser(column.Format);
                 case ColumnType.Date:
                     return GetDateTimeParser(column.Format);

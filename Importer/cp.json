@@ -1,0 +1,56 @@
+﻿{
+  "sources": [
+    {
+      "name": "mo",
+      "path": "../../Data/CP/MO.txt",
+      "media": "local",
+      "format": "fixed",
+      "hasLineDelimiters":true,
+      "login": "login",
+      "password": "password",
+      "rows": [
+        {
+          "columns": [
+            {"name": "Status","type": "integer", "width":2},
+            {"name": "IssueOffice","type": "integer", "width":6},
+            {"name": "Sort","type": "integer", "width":1},
+            {"name": "TermNo","type": "integer", "width":2},
+            {"name": "Flag","type": "integer", "width":2},
+            {"name": "BatchNo","type": "integer", "width":3},
+            {"name": "BatchSeqNo","type": "integer", "width":3},
+            {"name": "MoneyOrderSerial","type": "string", "width":9},
+            {"name": "CanAmount","type": "money", "width":6},
+            {"name": "IssueDate","type": "string", "width":6},
+            {"name": "RunDate","type": "string", "width":5},
+          ]
+        }
+      ]
+    }
+  ],
+  "targets":[
+    {
+      "name":"MO",
+      "path":"../../Data/CP/MO.csv",
+      "format":"csv",
+      "media":"local",
+      "delimiter":",",
+      "rows":[
+        {
+          "columns": [
+            {"name": "Status","type": "integer", "width":2},
+            {"name": "IssueOffice","type": "integer", "width":6},
+            {"name": "Sort","type": "integer", "width":1},
+            {"name": "TermNo","type": "integer", "width":2},
+            {"name": "Flag","type": "integer", "width":2},
+            {"name": "BatchNo","type": "integer", "width":3},
+            {"name": "BatchSeqNo","type": "integer", "width":3},
+            {"name": "MoneyOrderSerial"},
+            {"name": "CanAmount"},
+            {"name": "IssueDate"},
+            {"name": "RunDate"}
+          ]
+        }
+      ]
+    }
+  ]
+}

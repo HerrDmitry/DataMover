@@ -2,6 +2,7 @@
 {
     public enum FileFormat
     {
-        CSV
+        CSV,
+        Fixed
     }
 }

@@ -9,22 +9,14 @@ namespace Importer.Readers
 {
     public static partial class Readers
     {
-        public static Func<IReadOnlyList<ISourceField>> CsvReader(this Stream stream, Func<IFile> getConfiguration, Func<Interfaces.ILog> getLogger)
+        public static Func<IReadOnlyList<ISourceField>> CsvReader(this Func<int> readNext, IFile fileConfig, Interfaces.ILog logger)
         {
-            return new StreamReader(stream).CsvReader(getConfiguration, getLogger);
-        }
-
-        public static Func<IReadOnlyList<ISourceField>> CsvReader(this StreamReader stream, Func<IFile> getConfiguration, Func<Interfaces.ILog> getLogger)
-        {
-            var logger = getLogger?.Invoke();
-            var fileConfig = getConfiguration();
             if (fileConfig==null)
             {
                 var msg = Localization.GetLocalizationString("Could not get Source Configuration...");
                 logger?.Fatal(msg);
                 throw new ArgumentException(msg);
             }
-            var readNext=stream.BufferedRead(logger);
 
             var nullValue = string.IsNullOrWhiteSpace(fileConfig.NullValue) ? "" : fileConfig.NullValue;
             var delimiter = string.IsNullOrWhiteSpace(fileConfig.Delimiter) ? ',' : fileConfig.Delimiter[0];

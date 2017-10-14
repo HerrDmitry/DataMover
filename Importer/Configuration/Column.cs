@@ -13,5 +13,7 @@ namespace Importer.Configuration
         public string Format { get; set; }
         [JsonProperty("type")]
         public ColumnType Type { get; set; }
+        [JsonProperty("width")]
+        public int Width { get; set; }
     }
 }

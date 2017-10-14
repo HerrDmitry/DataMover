@@ -2,7 +2,7 @@
 
 namespace Interfaces.Configuration
 {
-    public interface IFile:ICsvFile,IFileMedia
+    public interface IFile:ICsvFile,IFileMedia,IFixedWidthFile
     {
         string Name { get; }
         FileFormat Format { get; }
@@ -13,6 +13,11 @@ namespace Interfaces.Configuration
     {
         string Delimiter { get; }
         string Qualifier { get; }
+        bool ForceQualifier { get; }
+    }
+    
+    public interface IFixedWidthFile{
+        bool HasLineDelimiters { get; }
     }
 
     public interface IFileMedia

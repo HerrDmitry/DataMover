@@ -2,44 +2,45 @@
 
 namespace Importer
 {
-    public static class Localization
-    {
-        private static Dictionary<string, string> localization;
-        private static Dictionary<string, string> defaultLocalization;
-        private static string language = "default";
-        static Localization()
-        {
-            localization=new Dictionary<string, string>();
-            defaultLocalization=new Dictionary<string, string>();
-            LoadDefaults();
-        }
+	public static class Localization
+	{
+		private static Dictionary<string, string> localization;
+		private static Dictionary<string, string> defaultLocalization;
+		private static string language = "default";
 
-        public static string GetLocalizationString(string key)
-        {
-            if (!localization.TryGetValue(key, out var localizedString))
-            {
-                if (!defaultLocalization.TryGetValue(key, out localizedString))
-                {
-                    return key;
-                }
-            }
+		static Localization()
+		{
+			localization = new Dictionary<string, string>();
+			defaultLocalization = new Dictionary<string, string>();
+			LoadDefaults();
+		}
 
-            return localizedString;
-        }
+		public static string GetLocalizationString(string key)
+		{
+			if (!localization.TryGetValue(key, out var localizedString))
+			{
+				if (!defaultLocalization.TryGetValue(key, out localizedString))
+				{
+					return key;
+				}
+			}
 
-        public static void SetLanguage(string lang)
-        {
-            language = lang;
-            LoadLanguage();
-        }
+			return localizedString;
+		}
 
-        private static void LoadLanguage()
-        {
-        }
+		public static void SetLanguage(string lang)
+		{
+			language = lang;
+			LoadLanguage();
+		}
 
-        private static void LoadDefaults()
-        {
-            defaultLocalization["test"]="test";
-        }
-    }
+		private static void LoadLanguage()
+		{
+		}
+
+		private static void LoadDefaults()
+		{
+			defaultLocalization["test"] = "test";
+		}
+	}
 }

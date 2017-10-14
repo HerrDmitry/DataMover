@@ -78,8 +78,9 @@
       "delimiter":",",
       "rows":[
         {
-          "columns":[{"name":"id1"},{"name":"id2"},{"name":"id3"},{"name":"date","format":"yyyy-MM-dd"}],
-      "filter":[{"name":"selector","value":"HDR"}]}
+          "columns":[{"name":"transactionId","type":"combine","format":"{id1}_{id2}_{id3}"},{"name":"id1"},{"name":"id2"},{"name":"id3"},{"name":"date","format":"yyyy-MM-dd"}], 
+          "filter":[{"name":"selector","value":"HDR"}]
+        }
       ]
     },
     {

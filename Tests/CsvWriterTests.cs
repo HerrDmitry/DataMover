@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using FileReader;
+using Importer;
 using Importer.Configuration;
 using Importer.Writers;
 using Interfaces;
@@ -30,32 +31,37 @@ namespace Tests
             }
 
             var stream=new MemoryStream();
-            RowFunc().WriteCsv(()=>stream, key =>
+            var streamWriter=new StreamWriter(stream);
+            var csvWriter = streamWriter.WriteCsv(new Importer.Configuration.File
             {
-                if (key == "TargetConfiguration")
+                Delimiter = ",",
+                Qualifier = "\"",
+                ForceQualifier = true,
+                RowsInternal = new List<Row>
                 {
-                    return new Importer.Configuration.File
+                    new Row()
                     {
-                        Delimiter = ",",
-                        Qualifier = "\"",
-                        RowsInternal = new List<Row>
+                        ColumnsInternal = new List<Column>
                         {
-                            new Row()
-                            {
-                                ColumnsInternal = new List<Column>
-                                {
-                                    new Column{Name = "A",Type = ColumnType.Integer},
-                                    new Column{Name = "B",Type = ColumnType.Date,Format = "ddMMyyyy"}
-                                }
-                            }
+                            new Column {Name = "A", Type = ColumnType.Integer},
+                            new Column {Name = "B", Type = ColumnType.Date, Format = "ddMMyyyy"}
                         }
-                    };
+                    }
                 }
+            }, new ConsoleLogger());
 
-                return null;
-            });
-            
-            stream.Flush();
+            var nextRow = RowFunc();
+            while (true)
+            {
+                var row = nextRow();
+                if (row == null)
+                {
+                    break;
+                }
+                csvWriter(row);
+            }
+
+            streamWriter.Flush();
             stream.Position = 0;
             var sr = new StreamReader(stream);
             var myStr = sr.ReadToEnd();
