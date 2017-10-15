@@ -23,7 +23,7 @@ namespace Importer.Readers
                 throw new ArgumentException(msg);
             }
             logger?.Info(string.Format(Localization.GetLocalizationString("Parsing data from {0}"),fileConfig.Name));
-            var parsers = fileConfig.Rows.GetRowParsers();
+            var parsers = fileConfig.GetRowParsers();
             var currentRecord = (long) 0;
             var parsedRecords = (long) 0;
             return () =>
@@ -46,7 +46,7 @@ namespace Importer.Readers
                             {
                                 "raw",
                                 new ValueWrapper<string>(string.Join(",", line.Select(x => x.Source)),
-                                    Localization.GetLocalizationString("Parse error"), true)
+                                    Localization.GetLocalizationString("Parse error"), true, string.Join(",", line.Select(x => x.Source)))
                             }
                         },
                         Localization.GetLocalizationString("Could not parse line."), currentRecord, currentRecord);
@@ -57,7 +57,7 @@ namespace Importer.Readers
             };
         }
 
-        private static Func<ISourceField, IValue> GetValueParser(this IColumn column)
+        private static Func<ISourceField, IValue> GetValueParser(this IColumn column, IFile fileConfig)
         {
             switch (column.Type)
             {
@@ -70,13 +70,17 @@ namespace Importer.Readers
                     return GetDateTimeParser(column.Format);
                 case ColumnType.String:
                 default:
-                    return GetStringParser(column.Format);
+                    return GetStringParser(column.Format, fileConfig);
             }
         }
 
-        private static Func<ISourceField, IValue> GetStringParser(string format)
+        private static Func<ISourceField, IValue> GetStringParser(string format, IFile fileConfig)
         {
-            return source => new ValueWrapper<string>(source.Source, null, source.Source==null);
+            if (fileConfig.TrimStrings)
+            {
+                return source => new ValueWrapper<string>(source.Source?.Trim(), null, source.Source==null, source.Source);
+            }
+            return source => new ValueWrapper<string>(source.Source, null, source.Source==null, source.Source);
         }
 
         private static Func<ISourceField, IValue> GetDateTimeParser(string format)
@@ -85,7 +89,7 @@ namespace Importer.Readers
             {
                 if (source?.Source == null)
                 {
-                    return new DateValueWrapper(DateTime.MinValue, null, true);
+                    return new DateValueWrapper(DateTime.MinValue, null, true, null);
                 }
                 DateTime value = default(DateTime);
                 var sourceStr = source.ToString();
@@ -97,7 +101,7 @@ namespace Importer.Readers
                         CultureInfo.InvariantCulture, DateTimeStyles.None, out value);
                 }
 
-                if (!string.IsNullOrWhiteSpace(format) || hasError)
+                if (string.IsNullOrWhiteSpace(format) || hasError)
                 {
                     hasError = !DateTime.TryParse(sourceStr, out value);
                 }
@@ -105,7 +109,7 @@ namespace Importer.Readers
                 var error = hasError ? Localization.GetLocalizationString("Could not parse date") : null;
 
 
-                return new DateValueWrapper(value, error, false);
+                return new DateValueWrapper(value, error, false, source.Source);
             };
         }
 
@@ -115,7 +119,7 @@ namespace Importer.Readers
             {
                 if (source?.Source == null)
                 {
-                    return new ValueWrapper<decimal>(0,null,true);
+                    return new ValueWrapper<decimal>(0,null,true, null);
                 }
                 var dec = '.';
                 var neg = '-';
@@ -140,7 +144,7 @@ namespace Importer.Readers
                 {
                     error = Localization.GetLocalizationString("Could not parse decimal");
                 }
-                return new ValueWrapper<decimal>(value, error, false);
+                return new ValueWrapper<decimal>(value, error, false, source.Source);
             };
         }
 
@@ -150,7 +154,7 @@ namespace Importer.Readers
             {
                 if (source?.Source == null)
                 {
-                    return new ValueWrapper<long>(0, null, true);
+                    return new ValueWrapper<long>(0, null, true, null);
                 }
                 if (!string.IsNullOrWhiteSpace(format))
                 {
@@ -161,23 +165,23 @@ namespace Importer.Readers
                     error = Localization.GetLocalizationString("Could not parse integer");
                 }
 
-                return new ValueWrapper<long>(value, error, false);
+                return new ValueWrapper<long>(value, error, false, source.Source);
             };
         }
 
-        private static Func<IReadOnlyList<ISourceField>,long,long, IDataRow> GetRowParsers(this IList<IRow> rows)
+        private static Func<IReadOnlyList<ISourceField>,long,long, IDataRow> GetRowParsers(this IFile fileConfig)
         {
-            var parsers= rows.Select(x => x.GetRowParser()).ToList();
+            var parsers= fileConfig.Rows.Select(x => x.GetRowParser(fileConfig)).ToList();
             return (source,rowNumber,rawLineNumber) =>
             {
                 return parsers.Select(parser => parser(source,rowNumber,rawLineNumber)).FirstOrDefault(result => result != null);
             };
         }
 
-        private static Func<IReadOnlyList<ISourceField>,long,long, IDataRow> GetRowParser(this IRow row)
+        private static Func<IReadOnlyList<ISourceField>,long,long, IDataRow> GetRowParser(this IRow row, IFile fileConfig)
         {
             var filter = row.PrepareSourceFilter();
-            var parsers = row.Columns.Select(x=>x.GetValueParser()).ToList();
+            var parsers = row.Columns.Select(x=>x.GetValueParser(fileConfig)).ToList();
 
             return (source,rowNumber,rawLineNumber) =>
             {
@@ -201,7 +205,7 @@ namespace Importer.Readers
 
         private class DateValueWrapper : ValueWrapper<DateTime>
         {
-            public DateValueWrapper(DateTime value, string error, bool isNull) : base(value, error, isNull)
+            public DateValueWrapper(DateTime value, string error, bool isNull, string source) : base(value, error, isNull, source)
             {
             }
 
@@ -213,16 +217,17 @@ namespace Importer.Readers
 
         private class ValueWrapper<T>:IValue<T>
         {
-            public ValueWrapper(T value, string error, bool isNull)
+            public ValueWrapper(T value, string error, bool isNull,string source)
             {
                 this.Value = value;
                 this.Error = error;
                 this.IsNull = isNull;
-
+                this.Source = source;
             }
 
             private readonly T Value;
             private readonly string Error;
+            public string Source { get; }
 
             public T GetValue()
             {

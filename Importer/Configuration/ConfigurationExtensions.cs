@@ -22,7 +22,7 @@ namespace Importer.Configuration
                     {
                         context.Log?.Error(string.Format(
                             Localization.GetLocalizationString("Could not parse line {0} - \"{1}\""), row.RowNumber,
-                            string.Join(",", row.Columns.Values.Select(x => x.ToString()))));
+                            string.Join(",", row.Columns.Values.Select(x => x.Source))));
                     }
                     if (row != null)
                     {

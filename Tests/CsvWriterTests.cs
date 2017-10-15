@@ -80,7 +80,7 @@ namespace Tests
 
         private class DateValue : Value<DateTime>
         {
-            public DateValue(DateTime value, string error = null):base(value,error)
+            public DateValue(DateTime value, string error=null,bool isNull=false ):base(value,error,isNull,value.ToString())
             {
             }
 
@@ -91,7 +91,7 @@ namespace Tests
         }
         private class IntegerValue : Value<long>
         {
-            public IntegerValue(long value, string error = null):base(value,error)
+            public IntegerValue(long value, string error=null, bool isNull=false):base(value,error,isNull,value.ToString())
             {
             }
 
@@ -102,7 +102,7 @@ namespace Tests
         }
         private class StringValue : Value<string>
         {
-            public StringValue(string value, string error = null):base(value,error)
+            public StringValue(string value, string error=null, bool isNull=false):base(value,error,isNull,value)
             {
             }
 
@@ -116,11 +116,12 @@ namespace Tests
             private readonly T value;
             private readonly string error;
 
-            protected Value(T value, string error = null, bool isNull=false)
+            protected Value(T value, string error, bool isNull, string source)
             {
                 this.value = value;
                 this.error = error;
                 this.IsNull = isNull;
+                this.Source = source;
             }
 
             public T GetValue()
@@ -128,6 +129,8 @@ namespace Tests
                 return this.value;
             }
 
+            public string Source { get; }
+        
             public abstract string ToString(string format);
 
             public override string ToString()

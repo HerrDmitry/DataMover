@@ -8,6 +8,7 @@ namespace Interfaces
         string ToString();
         string GetError();
         bool IsNull { get; }
+        string Source { get; }
     }
 
     public interface IValue<out T> : IValue
