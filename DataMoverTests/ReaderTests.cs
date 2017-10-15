@@ -15,11 +15,11 @@ namespace DataMoverTests
         {
             var s = "'a','b','c'";
             var stream = GetStreamFromString(s);
-            var reader = stream.CsvReader(() => new Importer.Configuration.File
+            var reader = stream.BufferedRead(new ConsoleLogger()).CsvReader(new Importer.Configuration.File
             {
                 Delimiter = ",",
                 Qualifier = "'"
-            }, () => new ConsoleLogger());
+            }, new ConsoleLogger());
             Assert.IsNotNull(reader);
             var row = reader();
             Assert.IsNotNull(row);

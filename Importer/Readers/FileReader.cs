@@ -11,6 +11,11 @@ namespace Importer.Readers
 {
     public static partial class Readers
     {
+        public static Func<int> BufferedRead(this Stream r, Interfaces.ILog logger)
+        {
+            return new StreamReader(r).BufferedRead(logger);
+        }
+
         public static Func<int> BufferedRead (this StreamReader r, Interfaces.ILog logger)
         {
             var buff = new char[60];

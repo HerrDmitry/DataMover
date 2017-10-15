@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using FileReader;
 using Importer;
@@ -9,6 +10,7 @@ using Importer.Readers;
 using Interfaces;
 using Interfaces.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using File = Importer.Configuration.File;
 
 namespace Tests
 {
@@ -21,12 +23,12 @@ namespace Tests
         {
             var s = "'a',1,'c',2,'2017-10-01 14:15:16'\n'a1',1.1,c1,3,'2017-10-04";
             var stream = GetStreamFromString(s);
-            var reader = stream.CsvReader(() => new File 
+            var reader = new StreamReader(stream).BufferedRead(new ConsoleLogger()).CsvReader( new File 
             {
                 Delimiter = ",",
                 Qualifier = "'"
-            }, () => new ConsoleLogger());
-            var parser = reader.ParseData(() => getConfig(), () => new ConsoleLogger());
+            },  new ConsoleLogger());
+            var parser = reader.ParseData(getConfig(), new ConsoleLogger());
             var row = parser();
             Assert.IsNotNull(row);
             Assert.IsTrue(string.IsNullOrEmpty(row.Error));
@@ -51,12 +53,12 @@ namespace Tests
         {
             var s = "'a',1,,2,'2017-10-01 14:15:16'\n'a1',1.1,c1,3,'2017-10-04";
             var stream = GetStreamFromString(s);
-            var reader = stream.CsvReader(() => new File
+            var reader = new StreamReader(stream).BufferedRead(new ConsoleLogger()).CsvReader(new File
             {
                 Delimiter = ",",
                 Qualifier = "'"
-            }, () => new ConsoleLogger());
-            var parser = reader.ParseData(()=>getConfig(), () => new ConsoleLogger());
+            }, new ConsoleLogger());
+            var parser = reader.ParseData(getConfig(), new ConsoleLogger());
             var row = parser();
             Console.WriteLine(row.Error);
             Assert.IsTrue(string.IsNullOrEmpty(row.Error));

@@ -15,12 +15,12 @@ namespace Tests
         {
             var s = "'a','b','c'";
             var stream = GetStreamFromString(s);
-            var reader = stream.CsvReader(() => new Importer.Configuration.File
+            var reader = new StreamReader(stream).BufferedRead(new ConsoleLogger()).CsvReader( new Importer.Configuration.File
             {
                 Delimiter = ",",
                 Qualifier = "'",
                 Name="Test"
-            },()=>new ConsoleLogger());
+            },new ConsoleLogger());
             Assert.IsNotNull(reader);
             var row = reader();
             Assert.IsNotNull(row);
@@ -33,11 +33,12 @@ namespace Tests
         public void CsvReadTest2()
         {
             var s = "'a''b','b','c'\n'd','e\ne',f";
-            var reader = GetStreamFromString(s).CsvReader(() => new Importer.Configuration.File
-            {
-                Delimiter = ",",
-                Qualifier = "'"
-            },()=>new ConsoleLogger());
+            var reader = new StreamReader(GetStreamFromString(s)).BufferedRead(new ConsoleLogger()).CsvReader(
+                new Importer.Configuration.File
+                {
+                    Delimiter = ",",
+                    Qualifier = "'"
+                }, new ConsoleLogger());
             Assert.IsNotNull(reader);
             var row = reader();
             Assert.IsNotNull(row);
@@ -57,11 +58,12 @@ namespace Tests
         public void CsvReadTest3()
         {
             var s = "'a''b',,'c'\n'd','e\ne',f";
-            var reader = GetStreamFromString(s).CsvReader(() => new Importer.Configuration.File
-            {
-                Delimiter = ",",
-                Qualifier = "'"
-            },()=>new ConsoleLogger());
+            var reader = new StreamReader(GetStreamFromString(s)).BufferedRead(new ConsoleLogger()).CsvReader(
+                new Importer.Configuration.File
+                {
+                    Delimiter = ",",
+                    Qualifier = "'"
+                }, new ConsoleLogger());
             Assert.IsNotNull(reader);
             var row = reader();
             Assert.IsNotNull(row);
