@@ -4,6 +4,8 @@
     {
         FTP,
         HTTP,
-        Local
+        Local,
+        Wave,
+        Salesforce
     }
 }

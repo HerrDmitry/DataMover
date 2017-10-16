@@ -12,8 +12,10 @@ namespace Importer
 {
     public static class Runner
     {
-        public static void RunImport(string configurationFilePath)
+        public static void RunImport(string[] args)
         {
+            var configurationFilePath=args[0];
+            
             var configuration =
                 JsonConvert.DeserializeObject<Configuration.Configuration>(System.IO.File.OpenText(configurationFilePath)
                     .ReadToEnd());

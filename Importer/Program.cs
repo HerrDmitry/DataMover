@@ -16,7 +16,7 @@ namespace Importer
             {
                 if (File.Exists(args[0]))
                 {
-                    Runner.RunImport(args[0]);
+                    Runner.RunImport(args);
                 }
                 else
                 {
