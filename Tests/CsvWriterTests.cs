@@ -32,7 +32,7 @@ namespace Tests
 
             var stream=new MemoryStream();
             var streamWriter=new StreamWriter(stream);
-            var csvWriter = streamWriter.WriteCsv(new Importer.Configuration.File
+            var csvWriter = streamWriter.GetCsvWriter(new Importer.Configuration.File
             {
                 Delimiter = ",",
                 Qualifier = "\"",

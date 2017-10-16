@@ -12,7 +12,7 @@ namespace Importer.Writers
     {
         private const string DEFAULT_QUALIFIER = "\"";
         private const string DEFAULT_DELIMITER = ",";
-        public static Func<IDataRow,long> WriteCsv(this StreamWriter stream, IFile fileConfig, Interfaces.ILog log)
+        public static Func<IDataRow,long> GetCsvWriter(this StreamWriter stream, IFile fileConfig, Interfaces.ILog log)
         {
             var nullValue = string.IsNullOrWhiteSpace(fileConfig.NullValue) ? "" : fileConfig.NullValue;
             var delimiter = string.IsNullOrWhiteSpace(fileConfig.Delimiter)?DEFAULT_DELIMITER[0]:fileConfig.Delimiter[0];

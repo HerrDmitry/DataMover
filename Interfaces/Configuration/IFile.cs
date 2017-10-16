@@ -27,6 +27,7 @@ namespace Interfaces.Configuration
         MediaType MediaType { get; }
         string Login { get; }
         string Password { get; }
+        string Token { get; }
         string Path { get; }
         bool IncludeSubfolders { get; }
         bool AppendToExisting { get; }

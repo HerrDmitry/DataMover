@@ -64,6 +64,7 @@
       "delimiter":",",
       "login":"123",
       "password":"123",
+      "token":"123",
       "rows":[
         {
           "columns": [

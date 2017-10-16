@@ -26,6 +26,8 @@ namespace Importer.Configuration
         public string Login { get; set; }
         [JsonProperty("password")]
         public string Password { get; set; }
+        [JsonProperty("token")]
+        public string Token { get; set; }
         [JsonProperty("path")]
         public string Path { get; set; }
         [JsonProperty("includeSubfolders")]

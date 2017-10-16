@@ -56,7 +56,7 @@ namespace Importer.Writers
                 switch (file.Format)
                 {
                     case FileFormat.CSV:
-                        var writerStream = stream.WriteCsv(file, log);
+                        var writerStream = stream.GetCsvWriter(file, log);
                         return row =>
                         {
                             if (row == null)
