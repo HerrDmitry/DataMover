@@ -8,5 +8,6 @@ namespace Interfaces.Configuration
         string Format { get; }
         ColumnType Type { get; }
         int Width { get; }
+        CalendarType? CalendarType { get; }
     }
 }

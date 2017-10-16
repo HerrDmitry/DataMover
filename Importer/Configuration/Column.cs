@@ -15,5 +15,7 @@ namespace Importer.Configuration
         public ColumnType Type { get; set; }
         [JsonProperty("width")]
         public int Width { get; set; }
+        [JsonProperty("calendar")]
+        public CalendarType? CalendarType { get; set; }
     }
 }

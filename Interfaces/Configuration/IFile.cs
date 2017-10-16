@@ -15,6 +15,7 @@ namespace Interfaces.Configuration
         string Delimiter { get; }
         string Qualifier { get; }
         bool ForceQualifier { get; }
+        SurroundedQualifierType? SurroundedQualifier { get; }
     }
     
     public interface IFixedWidthFile{

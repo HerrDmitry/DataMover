@@ -14,6 +14,8 @@ namespace Importer.Configuration
         public string Qualifier { get; set; }
         [JsonProperty("forceQualifier")]
         public bool ForceQualifier { get; set; }
+        [JsonProperty("surroundedQualifier")]
+        public SurroundedQualifierType? SurroundedQualifier { get; }
         [JsonProperty("trimStrings")]
         public bool TrimStrings { get; set; }
         [JsonProperty("hasLineDelimiters")]

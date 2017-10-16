@@ -67,7 +67,7 @@ namespace Importer.Readers
                 case ColumnType.Money:
                     return GetDecimalParser(column.Format);
                 case ColumnType.Date:
-                    return GetDateTimeParser(column.Format);
+                    return column.GetDateTimeParser();
                 case ColumnType.String:
                 default:
                     return GetStringParser(column.Format, fileConfig);
@@ -83,7 +83,7 @@ namespace Importer.Readers
             return source => new ValueWrapper<string>(source.Source, null, source.Source==null, source.Source);
         }
 
-        private static Func<ISourceField, IValue> GetDateTimeParser(string format)
+        private static Func<ISourceField, IValue> GetDateTimeParser(this IColumn column)
         {
             return source =>
             {
@@ -91,23 +91,27 @@ namespace Importer.Readers
                 {
                     return new DateValueWrapper(DateTime.MinValue, null, true, null);
                 }
-                DateTime value = default(DateTime);
+                DateTime value = default;
                 var sourceStr = source.ToString();
                 var hasError = false;
-                if (!string.IsNullOrWhiteSpace(format))
+                if (!string.IsNullOrWhiteSpace(column.Format))
                 {
                     hasError = !DateTime.TryParseExact(sourceStr,
-                        format.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries),
+                        column.Format.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries),
                         CultureInfo.InvariantCulture, DateTimeStyles.None, out value);
                 }
 
-                if (string.IsNullOrWhiteSpace(format) || hasError)
+                if (string.IsNullOrWhiteSpace(column.Format) || hasError)
                 {
                     hasError = !DateTime.TryParse(sourceStr, out value);
                 }
 
+                if (!hasError && column.CalendarType == CalendarType.Julian)
+                {
+                    value = new JulianCalendar().ToDateTime(value.Year, value.Month, value.Day, value.Hour,
+                        value.Minute, value.Second, value.Millisecond);
+                }
                 var error = hasError ? Localization.GetLocalizationString("Could not parse date") : null;
-
 
                 return new DateValueWrapper(value, error, false, source.Source);
             };

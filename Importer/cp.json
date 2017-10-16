@@ -21,7 +21,7 @@
             {"name": "BatchSeqNo","type": "integer", "width":3},
             {"name": "MoneyOrderSerial","type": "string", "width":9},
             {"name": "CanAmount","type": "money", "width":6},
-            {"name": "IssueDate","type": "date", "width":6, "format":"ddMMyy"},
+            {"name": "IssueDate","type": "date", "width":6, "format":"ddMMyy", "calendar":"Julian"},
             {"name": "RunDate","type": "string", "width":5},
             {"name": "Tray","type": "integer", "width":2},
             {"name": "FeeCode","type": "integer", "width":1},
@@ -48,7 +48,7 @@
             {"name": "Sender Bus Name","type": "string", "width":40},
             {"name": "Cash Amount","type": "money", "width":14},
             {"name": "Non-Cash Amount","type": "money", "width":14},
-            {"name": "Transaction Time","type": "string", "width":8},
+            {"name": "Transaction Time","type": "date", "width":8, "format":"hh:mm:ss"},
             {"name": "User ID","type": "string", "width":7},
           ]
         }

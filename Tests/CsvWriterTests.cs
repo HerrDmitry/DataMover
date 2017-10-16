@@ -22,8 +22,8 @@ namespace Tests
             {
                 var rows = new List<IDataRow>
                 {
-                    new DataRow{Columns = new Dictionary<string, IValue>{{"A", new IntegerValue(123)},{"B", new DateValue(new DateTime(2017,10,05))}}},
-                    new DataRow{Columns = new Dictionary<string, IValue>{{"A", new IntegerValue(321)},{"B", new DateValue(new DateTime(2017,10,06))}}}
+                    new DataRow{Columns = new Dictionary<string, IValue>{{"A", new IntegerValue(123)},{"B", new DateValue(new DateTime(2017,10,05))},{"C",new StringValue("a,b,\"c\"")}}},
+                    new DataRow{Columns = new Dictionary<string, IValue>{{"A", new IntegerValue(321)},{"B", new DateValue(new DateTime(2017,10,06))},{"C", new StringValue("a\"b")}}}
                 };
 
                 var index = 0;
@@ -36,7 +36,7 @@ namespace Tests
             {
                 Delimiter = ",",
                 Qualifier = "\"",
-                ForceQualifier = true,
+                ForceQualifier = false,
                 RowsInternal = new List<Row>
                 {
                     new Row()
@@ -44,7 +44,8 @@ namespace Tests
                         ColumnsInternal = new List<Column>
                         {
                             new Column {Name = "A", Type = ColumnType.Integer},
-                            new Column {Name = "B", Type = ColumnType.Date, Format = "ddMMyyyy"}
+                            new Column {Name = "B", Type = ColumnType.Date, Format = "ddMMyyyy"},
+                            new Column {Name = "C", Type = ColumnType.String}
                         }
                     }
                 }
@@ -65,7 +66,7 @@ namespace Tests
             stream.Position = 0;
             var sr = new StreamReader(stream);
             var myStr = sr.ReadToEnd();
-            Assert.AreEqual("\"123\",\"05102017\"\n\"321\",\"06102017\"\n",myStr);
+            Assert.AreEqual("123,05102017,\"a,b,\\\"c\\\"\"\n321,06102017,\"a\\\"b\"\n",myStr);
         }
 
         private class DataRow : IDataRow
