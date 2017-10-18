@@ -9,5 +9,7 @@ namespace Interfaces
         IEnumerable<StringBuilder> Columns { get; }
         StringBuilder Source { get; }
         long RowNumber { get; }
+        string SourcePath { get; }
+
     }
 }

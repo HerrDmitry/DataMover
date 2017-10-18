@@ -92,7 +92,7 @@ namespace Importer.Writers
 
         private static StreamWriter GetLocalStream(this IFileMedia media, Interfaces.ILog log)
         {
-            if (File.Exists(media.Path) && !media.AppendToExisting)
+            if (File.Exists(media.Path) && media.Operation!=DataOperation.Append)
             {
                 try
                 {

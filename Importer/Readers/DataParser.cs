@@ -12,7 +12,7 @@ namespace Importer.Readers
 {
     public static partial class Readers
     {
-        public static Func<IDataRow> ParseData(this Func<IReadOnlyList<ISourceField>> getLineFunc, IFile fileConfig, Interfaces.ILog logger)
+        public static Func<IDataRow> ParseData(this Func<ISourceRow> getLineFunc, IFile fileConfig, Interfaces.ILog logger)
         {
             long sourceLineNumber = 0;
             long rowNumber = 0;
@@ -43,7 +43,7 @@ namespace Importer.Readers
                     }
                     catch (Exception ex)
                     {
-                        logger?.Error(Localization.GetLocalizationString("Failed to parse line: \"{0}\"", string.Join(",", line.Select(x => x.Source))));
+                        logger?.Error(Localization.GetLocalizationString("Failed to parse line: \"{0}\"", string.Join(",", line.Fields.Select(x => x.Source))));
                         throw ex;
                     }
 
@@ -53,11 +53,11 @@ namespace Importer.Readers
                         {
                             {
                                 "raw",
-                                new ValueWrapper<string>(string.Join(",", line.Select(x => x.Source)),
-                                    Localization.GetLocalizationString("Parse error"), true, string.Join(",", line.Select(x => x.Source)))
+                                new ValueWrapper<string>(string.Join(",", line.Fields.Select(x => x.Source)),
+                                    Localization.GetLocalizationString("Parse error"), true, string.Join(",", line.Fields.Select(x => x.Source)))
                             }
                         },
-                        Localization.GetLocalizationString("Could not parse line."), currentRecord, currentRecord);
+                        Localization.GetLocalizationString("Could not parse line."), currentRecord, currentRecord, line.Context.SourcePath);
                 }
                 
                 logger?.Info(string.Format(Localization.GetLocalizationString("Parsed {0}/{1} records from {2}"),parsedRecords,currentRecord,fileConfig.Name));
@@ -119,7 +119,7 @@ namespace Importer.Readers
                     value = new JulianCalendar().ToDateTime(value.Year, value.Month, value.Day, value.Hour,
                         value.Minute, value.Second, value.Millisecond);
                 }
-                var error = hasError ? Localization.GetLocalizationString("Could not parse date") : null;
+                var error = hasError ? Localization.GetLocalizationString("Could not parse date \"{0}\" ",source.Source) : null;
 
                 return new DateValueWrapper(value, error, false, source.Source);
             };
@@ -154,7 +154,7 @@ namespace Importer.Readers
                 if (!decimal.TryParse(normalizedSource.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture,
                     out decimal value))
                 {
-                    error = Localization.GetLocalizationString("Could not parse decimal");
+                    error = Localization.GetLocalizationString("Could not parse decimal \"{0}\" ",source.Source);
                 }
                 return new ValueWrapper<decimal>(value, error, false, source.Source);
             };
@@ -174,14 +174,14 @@ namespace Importer.Readers
                 string error = null;
                 if (!long.TryParse(source.ToString(), out var value))
                 {
-                    error = Localization.GetLocalizationString("Could not parse integer");
+                    error = Localization.GetLocalizationString("Could not parse integer \"{0}\" ",source.Source);
                 }
 
                 return new ValueWrapper<long>(value, error, false, source.Source);
             };
         }
 
-        private static Func<IReadOnlyList<ISourceField>,long,long, IDataRow> GetRowParsers(this IFile fileConfig)
+        private static Func<ISourceRow,long,long, IDataRow> GetRowParsers(this IFile fileConfig)
         {
             var parsers= fileConfig.Rows.Select(x => x.GetRowParser(fileConfig)).ToList();
             return (source,rowNumber,rawLineNumber) =>
@@ -190,28 +190,28 @@ namespace Importer.Readers
             };
         }
 
-        private static Func<IReadOnlyList<ISourceField>,long,long, IDataRow> GetRowParser(this IRow row, IFile fileConfig)
+        private static Func<ISourceRow,long,long, IDataRow> GetRowParser(this IRow row, IFile fileConfig)
         {
             var filter = row.PrepareSourceFilter();
             var parsers = row.Columns.Select(x=>x.GetValueParser(fileConfig)).ToList();
 
             return (source,rowNumber,rawLineNumber) =>
             {
-                if (!filter(source))
+                if (!filter(source.Fields))
                 {
                     return null;
                 }
 
                 var values = new Dictionary<string, IValue>();
-                var columnsCount = Math.Min(source.Count, parsers.Count);
+                var columnsCount = Math.Min(source.Fields.Count, parsers.Count);
                 var error = new StringBuilder();
                 for (var i = 0; i < columnsCount; i++)
                 {
-                    var value = parsers[i](source[i]);
+                    var value = parsers[i](source.Fields[i]);
                     error.Append(value.GetError() ?? "");
                     values[row.Columns[i].Name] = value;
                 }
-                return new DataRow(values, error.ToString(), rowNumber, rawLineNumber);
+                return new DataRow(values, error.ToString(), rowNumber, rawLineNumber,source.Context.SourcePath);
             };
         }
 
@@ -266,17 +266,14 @@ namespace Importer.Readers
         
         private class DataRow : IDataRow
         {
-            public DataRow(string error, long rowNumber, long rawLineNumber):this(null,error,rowNumber,rawLineNumber)
-            {
-            }
-
             public DataRow(IDictionary<string, IValue> columns, string error, long rowNumber,
-                long rawLineNumber)
+                long rawLineNumber, string sourcePath)
             {
                 this.Columns = columns;
                 this.Error = error;
                 this.RowNumber = rowNumber;
                 this.RawLineNumber = rawLineNumber;
+                this.SourcePath = sourcePath;
             }
 
             public IDictionary<string, IValue> Columns { get; }
@@ -284,28 +281,8 @@ namespace Importer.Readers
             public long RowNumber { get; }
             public long RawLineNumber { get; }
 
-            public IValue this[string key]
-            {
-                get
-                {
-                    try
-                    {
-                        return this.Columns[key];
-                    }
-                    catch (KeyNotFoundException)
-                    {
-                        throw new ImporterArgumentOutOfRangeException(
-                            Localization.GetLocalizationString(
-                                "Column name \"{0}\" is not in columns list \"{1}\" values \"{2}\"", key,
-                                string.Join("\",\"", this.Columns.Select(x => x.Key)),
-                                string.Join("\",\"", this.Columns.Select(x => x.Value.Source))));
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new ImporterArgumentOutOfRangeException(ex.ToString());
-                    }
-                }
-            }
+            public IValue this[string key] => this.Columns.TryGetValueDefault(key);
+            public string SourcePath { get; }
         }
 
         private class RowParser

@@ -16,7 +16,7 @@ namespace Interfaces.Configuration
         string Delimiter { get; }
         string Qualifier { get; }
         bool ForceQualifier { get; }
-        SurroundedQualifierType? SurroundedQualifier { get; }
+        SurroundedQualifierType SurroundedQualifier { get; }
     }
     
     public interface IFixedWidthFile{
@@ -33,7 +33,7 @@ namespace Interfaces.Configuration
         string ClientSecret { get; }
         string Path { get; }
         bool IncludeSubfolders { get; }
-        bool AppendToExisting { get; }
+        DataOperation Operation { get; }
     }
 
     public interface IHasNullableColumns

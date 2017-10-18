@@ -139,14 +139,14 @@ namespace Importer.Writers
 			};
 		}
 
-		private static async Task InitiateDatasetUpload(this WaveContext context, string xmdJson, Interfaces.ILog log)
+		private static async Task InitiateDatasetUpload(this WaveContext context, string xmdJson, DataOperation operation, Interfaces.ILog log)
 		{
 			var url = $"{context.EntryPoint}/services/data/v41.0/sobjects/InsightsExternalData";
 			log.Info(Localization.GetLocalizationString("Initializing data upload"));
 			var client = new HttpClient();
 			var encJson = Convert.ToBase64String(Encoding.UTF8.GetBytes(xmdJson));
 			var payload =
-				$"{{\"Format\":\"csv\",\"EdgemartAlias\":\"{context.Alias}\",\"Operation\":\"Append\",\"Action\":\"None\",\"MetadataJson\":\"{encJson}\"}}";
+				$"{{\"Format\":\"csv\",\"EdgemartAlias\":\"{context.Alias}\",\"Operation\":\"{operation.ToString()}\",\"Action\":\"None\",\"MetadataJson\":\"{encJson}\"}}";
 			var content = new StringContent(payload,Encoding.ASCII);
 			content.Headers.ContentType=new MediaTypeHeaderValue("application/json");
 			client.AddAuthorization(context);
@@ -173,8 +173,10 @@ namespace Importer.Writers
 			if (response.IsSuccessStatusCode)
 			{
 				log.Info(Localization.GetLocalizationString("Successfully uploaded {0}", context.Alias));
+				return;
 			}
-			throw new ImporterUploadException(await response.Content.ReadAsStringAsync());
+			var responseText = await response.Content.ReadAsStringAsync();
+			throw new ImporterUploadException($"{response.StatusCode} -{responseText}");
 		}
 
 		private static async Task<Func<MemoryStream,bool,int>> GetDataChunkUploader(this IFile fileConfig, Interfaces.ILog log)
@@ -187,7 +189,7 @@ namespace Importer.Writers
 				var context = getContext();
 				if (string.IsNullOrWhiteSpace(context.SetId))
 				{
-					context.InitiateDatasetUpload(xmdJson(), log).Wait();
+					context.InitiateDatasetUpload(xmdJson(),fileConfig.Operation, log).Wait();
 					if (string.IsNullOrWhiteSpace(context.SetId))
 					{
 						throw new ImporterException(
@@ -204,7 +206,6 @@ namespace Importer.Writers
 				var url = $"{context.EntryPoint}/services/data/v41.0/sobjects/InsightsExternalDataPart";
 				client.AddAuthorization(context);
 				log.Debug($"Uploading chunk {chunkNo}");
-				log.Debug(payload);
 				var response = client.PostAsync(url, content).Result;
 				if (response.IsSuccessStatusCode)
 				{

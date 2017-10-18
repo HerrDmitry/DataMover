@@ -19,7 +19,7 @@ namespace Importer.Writers
             var qualifier = string.IsNullOrWhiteSpace(fileConfig.Qualifier) ? DEFAULT_QUALIFIER[0] : fileConfig.Qualifier[0];
             var filters = fileConfig.Rows.Select(x => x.PrepareTargetFilter()).ToList();
             var rowCount = (long) 0;
-            var getQualifiedString = fileConfig.GetQualifiedStrFunc();
+            var getQualifiedString = fileConfig.GetQualifiedStrFunc(log);
             return row =>
             {
                 if (!string.IsNullOrWhiteSpace(row.Error))
@@ -33,18 +33,33 @@ namespace Importer.Writers
                         continue;
                     }
                     var columns = fileConfig.Rows[r].Columns;
+                    var rowString=new StringBuilder();
+                    string error = null;
                     for (var c = 0; c < columns.Count; c++)
                     {
                         var value = row[columns[c].Name];
+                        if (value == null)
+                        {
+                            //log.Warning(Localization.GetLocalizationString("Could not find column {0}", columns[c].Name));
+                        }
+                        
                         var valueString = value != null ? getQualifiedString(value.ToString(columns[c].Format)) : nullValue;
-                        stream.Write(valueString);
+                        rowString.Append(valueString);
                         if (columns.Count - 1 > c)
                         {
-                            stream.Write(delimiter);
+                            rowString.Append(delimiter);
                         }
                     }
-
-                    stream.WriteLine();
+                    if (!string.IsNullOrWhiteSpace(row.Error) || error != null)
+                    {
+                        log.Error(Localization.GetLocalizationString("Error in file {0}, line {1}",row.SourcePath, row.RawLineNumber) + " - " +
+                                  (row.Error ?? "") + (error ?? "") + "\n\r\t" +
+                                  string.Join(",", row.Columns.Values.Select(x => x.Source)));
+                    }
+                    else
+                    {
+                        stream.WriteLine(rowString.ToString());
+                    }
                     rowCount++;
                 }
 
@@ -52,11 +67,11 @@ namespace Importer.Writers
             };
 
         }
-        private static Func<string, string> GetQualifiedStrFunc(this ICsvFile fileConfig)
+        private static Func<string, string> GetQualifiedStrFunc(this ICsvFile fileConfig,ILog log)
         {
             var qualifier = fileConfig.Qualifier?.Length > 0 ? fileConfig.Qualifier[0].ToString() : DEFAULT_QUALIFIER;
             var delimiter = fileConfig.Delimiter?.Length > 0 ? fileConfig.Delimiter[0].ToString() : DEFAULT_DELIMITER;
-            var replaceQualifier = qualifier.getReplaceQualifierFunc(fileConfig.SurroundedQualifier);
+            var replaceQualifier = qualifier.getReplaceQualifierFunc(fileConfig.SurroundedQualifier, log);
             
             if (fileConfig.ForceQualifier)
             {
@@ -73,10 +88,11 @@ namespace Importer.Writers
             };
         }
 
-        private static Func<string, string> getReplaceQualifierFunc(this string qualifier, SurroundedQualifierType? qt)
+        private static Func<string, string> getReplaceQualifierFunc(this string qualifier, SurroundedQualifierType? qt, ILog log)
         {
             var qualifierReplacement =
                 (qt == SurroundedQualifierType.Double ? qualifier : "\\") + qualifier;
+            log.Debug($"Replacing {qualifier} with {qualifierReplacement}");
             return source => string.IsNullOrWhiteSpace(source)?source:new StringBuilder(source).Replace(qualifier, qualifierReplacement).ToString();
         }
     }

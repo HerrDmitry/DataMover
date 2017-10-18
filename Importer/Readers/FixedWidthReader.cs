@@ -10,9 +10,9 @@ namespace Importer.Readers
 {
 	public partial class Readers
 	{
-		public static Func<IReadOnlyList<ISourceField>> FixedWidthReader(this Func<int> readNext, IFile fileConfig, Interfaces.ILog logger)
+		public static Func<ISourceRow> FixedWidthReader(this Func<int> readNext, ISourceFileContext context, Interfaces.ILog logger)
 		{
-			if (fileConfig==null)
+			if (context?.FileConfiguration==null)
 			{
 				var msg = Localization.GetLocalizationString("Could not get Source Configuration...");
 				logger?.Fatal(msg);
@@ -20,8 +20,8 @@ namespace Importer.Readers
 			}
 			var locker = new object();
 			long rowCount = 0;
-			logger?.Info(string.Format(Localization.GetLocalizationString("Loading data from {0}..."), fileConfig.Name));
-			var lineReaders = fileConfig.Rows.Select(x => x.GetLineFunc(fileConfig)).ToList();
+			logger?.Info(string.Format(Localization.GetLocalizationString("Loading data from {0}..."), context.FileConfiguration.Name));
+			var lineReaders = context.FileConfiguration.Rows.Select(x => x.GetLineFunc(context.FileConfiguration)).ToList();
 
 			return () =>
 			{
@@ -32,7 +32,7 @@ namespace Importer.Readers
 					{
 						result.AddRange(reader(readNext));
 					}
-					return result.Count>0?result:null;
+					return result.Count > 0 ? new SourceRow {Context = context, Fields = result} : null;
 				}
 			};
 		}

@@ -15,7 +15,7 @@ namespace Importer.Configuration
         [JsonProperty("forceQualifier")]
         public bool ForceQualifier { get; set; }
         [JsonProperty("surroundedQualifier")]
-        public SurroundedQualifierType? SurroundedQualifier { get; }
+        public SurroundedQualifierType SurroundedQualifier { get; set; }
         [JsonProperty("trimStrings")]
         public bool TrimStrings { get; set; }
         [JsonProperty("hasLineDelimiters")]
@@ -36,8 +36,6 @@ namespace Importer.Configuration
         public string Path { get; set; }
         [JsonProperty("includeSubfolders")]
         public bool IncludeSubfolders { get; }
-        [JsonProperty("append")]
-        public bool AppendToExisting { get; }
         [JsonProperty("name")]
         public string Name { get; set; }
         [JsonProperty("disabled")]
@@ -46,6 +44,8 @@ namespace Importer.Configuration
         public string NullValue { get; set; }
         [JsonProperty("format")]
         public FileFormat Format { get; set; }
+        [JsonProperty("operation")]
+        public DataOperation Operation { get; set; }
         [JsonIgnore]
         public IList<IRow> Rows { get; private set; }
         [JsonProperty("rows")]

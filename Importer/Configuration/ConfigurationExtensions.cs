@@ -21,7 +21,7 @@ namespace Importer.Configuration
                     if (!string.IsNullOrEmpty(row?.Error))
                     {
                         context.Log?.Error(string.Format(
-                            Localization.GetLocalizationString("Could not parse line {0} - \"{1}\""), row.RowNumber,
+                            Localization.GetLocalizationString("Could not parse line {0} - {1} - \"{2}\""), row.RowNumber,row.Error,
                             string.Join(",", row.Columns.Values.Select(x => x.Source))));
                     }
                     if (row != null)

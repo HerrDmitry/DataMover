@@ -11,5 +11,6 @@ namespace Interfaces
         long RowNumber { get; }
         long RawLineNumber { get; }
         IValue this[string key] { get; }
+        string SourcePath { get; }
     }
 }

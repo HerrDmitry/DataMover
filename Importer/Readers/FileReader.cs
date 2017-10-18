@@ -11,17 +11,16 @@ namespace Importer.Readers
 {
     public static partial class Readers
     {
-        public static Func<int> BufferedRead(this Stream r, Interfaces.ILog logger)
+        public static Func<int> BufferedRead (this ISourceFileContext r, Interfaces.ILog logger)
         {
-            return new StreamReader(r).BufferedRead(logger);
-        }
-
-        public static Func<int> BufferedRead (this StreamReader r, Interfaces.ILog logger)
-        {
+            if (r?.Stream == null)
+            {
+                throw new ImporterArgumentOutOfRangeException(Localization.GetLocalizationString("Source stream cannot be null"));
+            }
             var buff = new char[60];
             var position = 0;
             var length = 0;
-            var rd = r;
+            var rd = r.Stream;
             var readChars = (long) 0;
             var resultMessage = new Action(() =>
             {
@@ -34,7 +33,7 @@ namespace Importer.Readers
             {
                 if (position >= length)
                 {
-                    if (rd.EndOfStream)
+                    if (rd==null || rd.EndOfStream)
                     {
                         resultMessage();
                         readChars = 0;
@@ -63,7 +62,7 @@ namespace Importer.Readers
             var fileCount = 0;
             return () =>
             {
-                while (sourceStream != null)
+                while (sourceStream?.Stream != null)
                 {
                     var reader = readerFunc?.Invoke(sourceStream);
                     sourceStream = sourceStreamFunc?.Invoke();
@@ -84,20 +83,20 @@ namespace Importer.Readers
             };
         }
 
-        private static Func<StreamReader, Func<IDataRow>> GetStreamReader(this IFile fileConfig, Interfaces.ILog logger)
+        private static Func<ISourceFileContext, Func<IDataRow>> GetStreamReader(this IFile fileConfig, Interfaces.ILog logger)
         {
             switch (fileConfig.Format)
             {
                 case FileFormat.Fixed:
-                    return stream => stream?.BufferedRead(logger).FixedWidthReader(fileConfig, logger).ParseData(fileConfig, logger);
+                    return context => context?.BufferedRead(logger).FixedWidthReader(context, logger).ParseData(fileConfig, logger);
                 case FileFormat.CSV:
-                    return stream => stream?.BufferedRead(logger).CsvReader(fileConfig, logger).ParseData(fileConfig, logger);
+                    return context => context?.BufferedRead(logger).CsvReader(context, logger).ParseData(fileConfig, logger);
                 default:
                     return null;
             }
         }
 
-        private static Func<StreamReader> GetSourceStream(this IFileMedia mediaInfo, Interfaces.ILog logger)
+        private static Func<ISourceFileContext> GetSourceStream(this IFile mediaInfo, Interfaces.ILog logger)
         {
             logger?.Debug($"Getting source stream(s) for media \"{mediaInfo.MediaType}\" - \"{mediaInfo.Path}\"");
             switch (mediaInfo.MediaType)
@@ -115,7 +114,16 @@ namespace Importer.Readers
                      
                     var getFile = files.GetNextFunc();
 
-                    return () => getFile().GetLocalFileStream(logger);
+                    return () =>
+                    {
+                        var file = getFile();
+                        return new SourceFileContext
+                        {
+                            SourcePath = file,
+                            Stream = file.GetLocalFileStream(logger),
+                            FileConfiguration = mediaInfo
+                        };
+                    };
             }
             return null;
         }

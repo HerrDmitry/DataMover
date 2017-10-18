@@ -9,8 +9,9 @@ namespace Importer.Readers
 {
     public static partial class Readers
     {
-        public static Func<IReadOnlyList<ISourceField>> CsvReader(this Func<int> readNext, IFile fileConfig, Interfaces.ILog logger)
+        public static Func<ISourceRow> CsvReader(this Func<int> readNext, ISourceFileContext context, Interfaces.ILog logger)
         {
+            var fileConfig = context.FileConfiguration;
             if (fileConfig==null)
             {
                 var msg = Localization.GetLocalizationString("Could not get Source Configuration...");
@@ -81,7 +82,7 @@ namespace Importer.Readers
                     }
 
                     rowCount++;
-                    return columns;
+                    return new SourceRow {Context = context, Fields = columns};
                 }
             };
         }

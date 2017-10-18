@@ -16,7 +16,7 @@ namespace Importer
 			LoadDefaults();
 		}
 
-		public static string GetLocalizationString(string key, params string[] values)
+		public static string GetLocalizationString(string key, params object[] values)
 		{
 			if (!localization.TryGetValue(key, out var localizedString))
 			{
