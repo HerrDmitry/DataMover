@@ -37,10 +37,13 @@ namespace Importer.Writers
             IFile fileMedia;
             while ((fileMedia = file()) != null)
             {
-                var writer = fileMedia.GetWriter(log);
-                if (writer != null)
+                if (!fileMedia.Disabled)
                 {
-                    writers.Add(writer);
+                    var writer = fileMedia.GetWriter(log);
+                    if (writer != null)
+                    {
+                        writers.Add(writer);
+                    }
                 }
             }
 

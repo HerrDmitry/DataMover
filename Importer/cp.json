@@ -2,7 +2,7 @@
   "sources": [
     {
       "name": "mo",
-      "path": "../../Data/CP/MO.txt",
+      "path": "../../Data/CP/fmx_PCMLTF/*.txt",
       "media": "local",
       "format": "fixed",
       "hasLineDelimiters":true,
@@ -48,7 +48,7 @@
             {"name": "Sender Bus Name","type": "string", "width":40},
             {"name": "Cash Amount","type": "money", "width":14},
             {"name": "Non_Cash Amount","type": "money", "width":14},
-            {"name": "Transaction Time","type": "date", "width":8, "format":"hh:mm:ss"},
+            {"name": "Transaction Time","type": "string", "width":8, "format":"hh:mm:ss"},
             {"name": "User ID","type": "string", "width":7},
           ]
         }
@@ -65,6 +65,7 @@
       "login":"123",
       "password":"123",
       "token":"123",
+			"disabled":true,
       "rows":[
         {
           "columns": [

@@ -32,11 +32,19 @@ namespace Importer.Readers
                 if (line != null)
                 {
                     currentRecord++;
-                    var row = parsers(line, currentRecord, currentRecord);
-                    if (row != null)
+                    try
                     {
-                        parsedRecords++;
-                        return row;
+                        var row = parsers(line, currentRecord, currentRecord);
+                        if (row != null)
+                        {
+                            parsedRecords++;
+                            return row;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger?.Error(Localization.GetLocalizationString("Failed to parse line: \"{0}\"", string.Join(",", line.Select(x => x.Source))));
+                        throw ex;
                     }
 
 
@@ -275,7 +283,29 @@ namespace Importer.Readers
             public string Error { get; }
             public long RowNumber { get; }
             public long RawLineNumber { get; }
-            public IValue this[string key] => this.Columns[key];
+
+            public IValue this[string key]
+            {
+                get
+                {
+                    try
+                    {
+                        return this.Columns[key];
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        throw new ImporterArgumentOutOfRangeException(
+                            Localization.GetLocalizationString(
+                                "Column name \"{0}\" is not in columns list \"{1}\" values \"{2}\"", key,
+                                string.Join("\",\"", this.Columns.Select(x => x.Key)),
+                                string.Join("\",\"", this.Columns.Select(x => x.Value.Source))));
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new ImporterArgumentOutOfRangeException(ex.ToString());
+                    }
+                }
+            }
         }
 
         private class RowParser

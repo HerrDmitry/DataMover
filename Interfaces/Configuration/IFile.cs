@@ -8,6 +8,7 @@ namespace Interfaces.Configuration
         FileFormat Format { get; }
         IList<IRow> Rows { get; }
         bool TrimStrings { get; }
+        bool Disabled { get; }
     }
 
     public interface ICsvFile:IHasNullableColumns

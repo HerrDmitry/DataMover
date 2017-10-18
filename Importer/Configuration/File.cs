@@ -40,6 +40,8 @@ namespace Importer.Configuration
         public bool AppendToExisting { get; }
         [JsonProperty("name")]
         public string Name { get; set; }
+        [JsonProperty("disabled")]
+        public bool Disabled { get; set; }
         [JsonProperty("null")]
         public string NullValue { get; set; }
         [JsonProperty("format")]

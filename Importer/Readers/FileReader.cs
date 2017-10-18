@@ -55,7 +55,7 @@ namespace Importer.Readers
 
         public static Func<Func<IDataRow>> ConfigureReaders(this IContext context)
         {
-            var nextSource = context.Config.Sources.GetNextFunc();
+            var nextSource = context.Config.Sources.Where(x=>!x.Disabled).GetNextFunc();
             var source = nextSource?.Invoke();
             var sourceStreamFunc = source?.GetSourceStream(context.Log);
             var sourceStream = sourceStreamFunc?.Invoke();
@@ -106,7 +106,7 @@ namespace Importer.Readers
                     var directoryName = Path.GetDirectoryName(Path.GetFullPath(mediaInfo.Path));
                     logger?.Debug($"Searching for local file(s) \"{Path.GetFullPath(mediaInfo.Path)}\"");
                     var files = Directory.EnumerateFiles(directoryName, Path.GetFileName(mediaInfo.Path),
-                        mediaInfo.IncludeSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                        mediaInfo.IncludeSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).OrderBy(x=>x);
                     logger?.Debug($"Found {files.Count()} file(s) matching the pattern.");
                     foreach (var file in files)
                     {
