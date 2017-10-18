@@ -48,7 +48,20 @@ namespace Importer.Configuration
 
         private static Interfaces.ILog GetLogger(this IConfiguration config)
         {
-            return new ConsoleLogger();
+            Interfaces.ILog logger;
+            if (!string.IsNullOrWhiteSpace(config.LogFileName))
+            {
+                var lg = new MultiLogger();
+                lg.AddLogger(new FileLogger(config.LogFileName));
+                lg.AddLogger(new ConsoleLogger(LogLevel.Info));
+                logger = lg;
+            }
+            else
+            {
+                logger = new ConsoleLogger();
+            }
+            ImporterException.ConfigureLogger(logger);
+            return logger;
         }
     }
 }

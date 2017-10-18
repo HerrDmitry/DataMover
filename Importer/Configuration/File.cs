@@ -28,6 +28,10 @@ namespace Importer.Configuration
         public string Password { get; set; }
         [JsonProperty("token")]
         public string Token { get; set; }
+        [JsonProperty("clientId")]
+        public string ClientId { get; set; }
+        [JsonProperty("clientSecret")]
+        public string ClientSecret { get; set; }
         [JsonProperty("path")]
         public string Path { get; set; }
         [JsonProperty("includeSubfolders")]

@@ -75,12 +75,14 @@ namespace Importer.Writers
             return row => { };
         }
 
-        private static StreamWriter GetWriterStream(this IFileMedia media, Interfaces.ILog log)
+        private static StreamWriter GetWriterStream(this IFile media, Interfaces.ILog log)
         {
             switch (media.MediaType)
             {
                 case MediaType.Local:
                     return media.GetLocalStream(log);
+                case MediaType.Wave:
+                    return media.GetWaveStreamWriter(log);
             }
             return null;
         }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.Design;
 
 namespace Importer
 {
@@ -15,17 +16,17 @@ namespace Importer
 			LoadDefaults();
 		}
 
-		public static string GetLocalizationString(string key)
+		public static string GetLocalizationString(string key, params string[] values)
 		{
 			if (!localization.TryGetValue(key, out var localizedString))
 			{
 				if (!defaultLocalization.TryGetValue(key, out localizedString))
 				{
-					return key;
+					localizedString = key;
 				}
 			}
 
-			return localizedString;
+			return values?.Length > 0 ? string.Format(localizedString, values) : localizedString;
 		}
 
 		public static void SetLanguage(string lang)

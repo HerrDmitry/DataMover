@@ -22,14 +22,20 @@ namespace Importer
             
             var context = configuration.GetContext();
             context.Log.Debug("Starting import...");
-            var watch = new Stopwatch();
-            watch.Start();
-            context.GetDataWriter()(context.GetDataReader());
-            watch.Stop();
-            context.Log.Info(string.Format(Localization.GetLocalizationString("Import finished in {0}"),
-                watch.GetTime()));
-            context.FinalizeImport();
-            
+            try
+            {
+                var watch = new Stopwatch();
+                watch.Start();
+                context.GetDataWriter()(context.GetDataReader());
+                watch.Stop();
+                context.Log.Info(string.Format(Localization.GetLocalizationString("Import finished in {0}"),
+                    watch.GetTime()));
+            }
+            finally
+            {
+                context.FinalizeImport();
+            }
+
         }
 
         private static IConfiguration ApplyArguments(this IConfiguration config, string[] args)
@@ -79,6 +85,12 @@ namespace Importer
                             return;
                         case "TOKEN":
                             fileConfig.Token = value;
+                            return;
+                        case "CLIENTID":
+                            fileConfig.ClientId = value;
+                            return;
+                        case "CLIENTSECRET":
+                            fileConfig.ClientSecret = value;
                             return;
                     }
                 }

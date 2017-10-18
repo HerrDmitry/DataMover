@@ -6,5 +6,6 @@ namespace Interfaces.Configuration
     {
         IList<IFile> Sources { get;}
         IList<IFile> Targets { get;}
+        string LogFileName { get; }
     }
 }

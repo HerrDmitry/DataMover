@@ -28,6 +28,8 @@ namespace Interfaces.Configuration
         string Login { get; }
         string Password { get; }
         string Token { get; }
+        string ClientId { get; }
+        string ClientSecret { get; }
         string Path { get; }
         bool IncludeSubfolders { get; }
         bool AppendToExisting { get; }

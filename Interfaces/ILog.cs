@@ -9,5 +9,6 @@ namespace Interfaces
         Action<string> Info { get; }
         Action<string> Fatal { get; }
         Action<string> Debug { get; }
+        Action Terminate { get; }
     }
 }

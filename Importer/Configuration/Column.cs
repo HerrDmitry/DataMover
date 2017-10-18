@@ -17,5 +17,7 @@ namespace Importer.Configuration
         public int Width { get; set; }
         [JsonProperty("calendar")]
         public CalendarType? CalendarType { get; set; }
+        [JsonProperty("description")]
+        public string Description { get; set; }
     }
 }

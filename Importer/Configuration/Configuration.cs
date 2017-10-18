@@ -22,5 +22,8 @@ namespace Importer.Configuration
         {
             set => Targets = value?.Cast<IFile>().ToList();
         }
+        
+        [JsonProperty("logFile")]
+        public string LogFileName { get; set; }
     }
 }

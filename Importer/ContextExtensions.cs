@@ -6,6 +6,7 @@ namespace Importer
     {
         public static void FinalizeImport(this IContext context)
         {
+            context?.Log?.Terminate();
         }
     }
 }
