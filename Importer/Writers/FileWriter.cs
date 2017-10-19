@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Xml.Schema;
 using Interfaces;
 using Interfaces.Configuration;
+using Newtonsoft.Json.Converters;
 
 namespace Importer.Writers
 {
@@ -52,7 +55,7 @@ namespace Importer.Writers
 
         private static Action<IDataRow> GetWriter(this IFile file, Interfaces.ILog log)
         {
-            var stream = file.GetWriterStream(log);
+            var stream = file.GetWriterStreams(log);
             var rowCount = (long) 0;
             if (stream != null)
             {
@@ -78,19 +81,34 @@ namespace Importer.Writers
             return row => { };
         }
 
-        private static StreamWriter GetWriterStream(this IFile media, Interfaces.ILog log)
+        private static StreamWriter GetWriterStreams(this IFile file, Interfaces.ILog log)
+        {
+            var streams = new List<Stream>();
+            if (file.MultipleMedia?.Count > 0)
+            {
+                streams = file.MultipleMedia.Where(x=>!x.Disabled).Select(x => x.GetWriterStream(file,log)).ToList();
+            }
+            else if(!file.Media.Disabled)
+            {
+                streams.Add(file.Media.GetWriterStream(file,log));
+            }
+            return new StreamWriter(new WriteStreamProxy(streams),Encoding.UTF8);
+        }
+
+        private static Stream GetWriterStream(this IFileMedia media, IFileConfiguration fileConfig, Interfaces.ILog log)
         {
             switch (media.MediaType)
             {
                 case MediaType.Local:
                     return media.GetLocalStream(log);
                 case MediaType.Wave:
-                    return media.GetWaveStreamWriter(log);
+                    return media.GetWaveStreamWriter(fileConfig,log);
             }
+
             return null;
         }
 
-        private static StreamWriter GetLocalStream(this IFileMedia media, Interfaces.ILog log)
+        private static Stream GetLocalStream(this IFileMedia media, Interfaces.ILog log)
         {
             if (File.Exists(media.Path) && media.Operation!=DataOperation.Append)
             {
@@ -105,7 +123,7 @@ namespace Importer.Writers
                 }
             }
 
-            return new StreamWriter(File.Open(media.Path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read));
+            return File.Open(media.Path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
         }
     }
 }

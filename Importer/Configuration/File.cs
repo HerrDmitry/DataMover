@@ -20,8 +20,10 @@ namespace Importer.Configuration
         public bool TrimStrings { get; set; }
         [JsonProperty("hasLineDelimiters")]
         public bool HasLineDelimiters { get; set; }
-        [JsonProperty("media")]
-        public MediaType MediaType { get; set; }
+        [JsonIgnore]
+        public IFileMedia Media { get; set; }
+        [JsonIgnore]
+        public IList<IFileMedia> MultipleMedia { get; set; }
         [JsonProperty("login")]
         public string Login { get; set; }
         [JsonProperty("password")]
@@ -51,6 +53,16 @@ namespace Importer.Configuration
         [JsonProperty("rows")]
         public List<Row> RowsInternal {
             set => this.Rows = value?.Cast<IRow>().ToList();
+        }
+        [JsonProperty("media")]
+        public FileMedia MediaInternal
+        {
+            set => Media = value;
+        }
+        [JsonProperty("multipleMedia")]
+        public List<FileMedia> MultipleMediaInternal
+        {
+            set => this.MultipleMedia = value?.Cast<IFileMedia>().ToList();
         }
     }
 }

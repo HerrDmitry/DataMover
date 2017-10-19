@@ -9,9 +9,8 @@ namespace Importer.Readers
 {
     public static partial class Readers
     {
-        public static Func<ISourceRow> CsvReader(this Func<int> readNext, ISourceFileContext context, Interfaces.ILog logger)
+        public static Func<ISourceRow> CsvReader(this Func<int> readNext, ISourceFileContext context, ICsvFile fileConfig, Interfaces.ILog logger)
         {
-            var fileConfig = context.FileConfiguration;
             if (fileConfig==null)
             {
                 var msg = Localization.GetLocalizationString("Could not get Source Configuration...");
@@ -41,7 +40,7 @@ namespace Importer.Readers
                     while ((c = readNext()) >= 0 && (c == '\n' || c == '\r')) ;
                     if (c < 0)
                     {
-                        logger?.Info(string.Format(Localization.GetLocalizationString("Loaded {0} line(s) from {1}."), rowCount, fileConfig.Name));
+                        logger?.Info(Localization.GetLocalizationString("Loaded {0} line(s) from {1}.", rowCount, fileConfig.Name));
                         return null;
                     }
                     var isQualified = false;

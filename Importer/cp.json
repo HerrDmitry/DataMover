@@ -2,8 +2,7 @@
   "sources": [
     {
       "name": "Money Order",
-      "path": "../../Data/CP/fmx_PCMLTF/fmx_PCMLTF_?????.txt",
-      "media": "local",
+      "media": {"media":"local","path": "../../Data/CP/fmx_PCMLTF/fmx_PCMLTF_?????.txt"},
       "format": "fixed",
       "hasLineDelimiters":true,
       "trimStrings":true,       
@@ -56,8 +55,7 @@
       ]
     },{
 			"name": "Money Gram",
-			"path": "../../Data/CP/CanadaPost_D_MGIAML/CanadaPost_D_MGIAML_????????????.txt",
-			"media": "local",
+			"media": {"media":"local","path": "../../Data/CP/CanadaPost_D_MGIAML/CanadaPost_D_MGIAML_????????????.txt"},
 			"format":"csv",
 			"delimiter":"|",
 			"trimStrings":true,
@@ -251,9 +249,8 @@
   "targets":[
     {
       "name":"MO Wave",
-      "path":"https://login.salesforce.com",
+      "credentials":"wave",
       "format":"csv",
-      "media":"wave",
       "delimiter":",",
 			"disabled":true,
       "surroundedQualifier":"double",
@@ -306,7 +303,6 @@
       "name":"MO",
       "path":"../../Data/CP/MO.csv",
       "format":"csv",
-      "media":"local",
       "delimiter":",",
       "surroundedQualifier":"double",
 			"source":"Money Order",
@@ -358,14 +354,28 @@
 		},
     {
 	    "name":"MG Wave",
-	    "path":"https://login.salesforce.com",
 	    "format":"csv",
-	    "media":"wave",
 	    "delimiter":",",
 	    "disabled":false,
 	    "surroundedQualifier":"double",
-	    "operation":"overwrite",
 	    "source":"Money Gram",
+			"multipleMedia":[
+				{
+					"media":"wave", 
+					"credentials":"wave",
+					"operation":"overwrite",
+					"disabled":true
+				},{
+					"media":"local",
+					"path":"../../Data/CP/MG.csv"
+				},{
+					"media":"local",
+					"path":"../../Data/CP/MG1.csv"
+				},{
+					"media":"local",
+					"path":"../../Data/CP/MG2.csv"
+				}
+			],
       "rows":[
         {
 	        "columns":[
@@ -415,13 +425,11 @@
     },
     {
       "name":"MG",
-      "path":"../../Data/CP/MG.csv",
       "format":"csv",
-      "media":"local",
       "delimiter":",",
       "surroundedQualifier":"double",
 			"source":"Money Gram",
-			"disabled":false,
+			"disabled":true,
       "rows":[
         {
 	        "columns":[
@@ -470,5 +478,22 @@
       ]
     }
   ],
-	"LogFile":"../../Data/CP/importLog.txt"
+	"logFiles":[
+		{
+			"name":"log",
+			"level":"debug",
+			"path":"../../Data/CP/importLog.txt"
+		}
+	],
+	"credentials":[
+		{
+			"name":"wave",
+			"login":"123",
+			"password":"123",
+			"token":"123",
+			"clientId":"123",
+			"clientSecret":"123",
+			"entryPoint":"https://login.salesforce.com"
+		}
+	]
 }

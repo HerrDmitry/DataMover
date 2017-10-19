@@ -12,7 +12,7 @@ namespace Importer.Readers
 	{
 		public static Func<ISourceRow> FixedWidthReader(this Func<int> readNext, ISourceFileContext context, Interfaces.ILog logger)
 		{
-			if (context?.FileConfiguration==null)
+			if (context?.FileMedia==null)
 			{
 				var msg = Localization.GetLocalizationString("Could not get Source Configuration...");
 				logger?.Fatal(msg);
@@ -37,7 +37,7 @@ namespace Importer.Readers
 			};
 		}
 
-		private static Func<Func<int>, List<ISourceField>> GetLineFunc(this IRow row, IFile fileConfig)
+		private static Func<Func<int>, List<ISourceField>> GetLineFunc(this IRow row, IFixedWidthFile fileConfig)
 		{
 			var lineLength = row.Columns.Sum(x => x.Width);
 			Func<List<ISourceField>, Action<int>> getAppender = result =>

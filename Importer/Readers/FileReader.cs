@@ -56,7 +56,7 @@ namespace Importer.Readers
         {
             var nextSource = context.Config.Sources.Where(x=>!x.Disabled).GetNextFunc();
             var source = nextSource?.Invoke();
-            var sourceStreamFunc = source?.GetSourceStream(context.Log);
+            var sourceStreamFunc = source?.Media?.GetSourceStream(source, context.Log);
             var sourceStream = sourceStreamFunc?.Invoke();
             var readerFunc = source.GetStreamReader(context.Log);
             var fileCount = 0;
@@ -70,7 +70,7 @@ namespace Importer.Readers
                     {
                         source = nextSource();
                         readerFunc = source?.GetStreamReader(context.Log);
-                        sourceStreamFunc = source?.GetSourceStream(context.Log);
+                        sourceStreamFunc = source?.Media.GetSourceStream(source, context.Log);
                         sourceStream = sourceStreamFunc?.Invoke();
                     }
                     
@@ -82,31 +82,30 @@ namespace Importer.Readers
                 return null;
             };
         }
-
-        private static Func<ISourceFileContext, Func<IDataRow>> GetStreamReader(this IFile fileConfig, Interfaces.ILog logger)
+        private static Func<ISourceFileContext, Func<IDataRow>> GetStreamReader(this IFileConfiguration fileConfig, Interfaces.ILog logger)
         {
             switch (fileConfig.Format)
             {
                 case FileFormat.Fixed:
                     return context => context?.BufferedRead(logger).FixedWidthReader(context, logger).ParseData(fileConfig, logger);
                 case FileFormat.CSV:
-                    return context => context?.BufferedRead(logger).CsvReader(context, logger).ParseData(fileConfig, logger);
+                    return context => context?.BufferedRead(logger).CsvReader(context, fileConfig, logger).ParseData(fileConfig, logger);
                 default:
                     return null;
             }
         }
 
-        private static Func<ISourceFileContext> GetSourceStream(this IFile mediaInfo, Interfaces.ILog logger)
+        private static Func<ISourceFileContext> GetSourceStream(this IFileMedia fileMedia, IFileConfiguration fileConfig, Interfaces.ILog logger)
         {
-            logger?.Debug($"Getting source stream(s) for media \"{mediaInfo.MediaType}\" - \"{mediaInfo.Path}\"");
-            switch (mediaInfo.MediaType)
+            logger?.Debug($"Getting source stream(s) for media \"{fileMedia.MediaType.ToString()}\" - \"{fileMedia.Path}\"");
+            switch (fileMedia.MediaType)
             {
                 case MediaType.Local:
-                    var directoryName = Path.GetDirectoryName(Path.GetFullPath(mediaInfo.Path));
-                    logger?.Debug($"Searching for local file(s) \"{Path.GetFullPath(mediaInfo.Path)}\"");
-                    var files = Directory.EnumerateFiles(directoryName, Path.GetFileName(mediaInfo.Path),
-                        mediaInfo.IncludeSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).OrderBy(x=>x);
-                    logger?.Debug($"Found {files.Count()} file(s) matching the pattern.");
+                    var directoryName = Path.GetDirectoryName(Path.GetFullPath(fileMedia.Path));
+                    logger?.Debug($"Searching for local file(s) \"{Path.GetFullPath(fileMedia.Path)}\"");
+                    var files = Directory.EnumerateFiles(directoryName, Path.GetFileName(fileMedia.Path),
+                        fileMedia.IncludeSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).OrderBy(x=>x).ToList();
+                    logger?.Debug($"Found {files.Count} file(s) matching the pattern.");
                     foreach (var file in files)
                     {
                         logger?.Debug(file);
@@ -121,7 +120,8 @@ namespace Importer.Readers
                         {
                             SourcePath = file,
                             Stream = file.GetLocalFileStream(logger),
-                            FileConfiguration = mediaInfo
+                            FileMedia = fileMedia,
+                            FileConfiguration = fileConfig
                         };
                     };
             }

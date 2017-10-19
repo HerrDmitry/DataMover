@@ -9,18 +9,18 @@ namespace Importer.Writers
 		private class WaveStream : Stream
 		{
 			private Interfaces.ILog logger;
-			private IFile fileConfig;
+			private IFileConfiguration fileConfig;
+			private IFileMedia fileMedia;
 			private Func<string> metadataBuilder;
 			private MemoryStream ms;
 			private readonly Func<MemoryStream, bool, int> writeToWaveFunc;
 			private long recordCount;
-			public WaveStream(IFile fileConfig, Interfaces.ILog log)
+			public WaveStream(IFileMedia fileMedia,IFileConfiguration fileConfig, Interfaces.ILog log)
 			{
 				this.logger = log;
 				this.fileConfig = fileConfig;
-				this.metadataBuilder = fileConfig.GetMetadataBuilder();
 				this.ms=new MemoryStream();
-				this.writeToWaveFunc = fileConfig.GetDataSenderFunc(log).Result;
+				this.writeToWaveFunc = fileMedia.GetDataSenderFunc(fileConfig,log).Result;
 			}
 
 			public override void Flush()

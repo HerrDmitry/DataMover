@@ -8,6 +8,7 @@ namespace Importer.Readers
 	{
 		public string SourcePath { get; set; }
 		public StreamReader Stream { get; set; }
-		public IFile FileConfiguration { get; set; }
+		public IFileMedia FileMedia { get; set; }
+		public IFileConfiguration FileConfiguration { get; set; }
 	}
 }

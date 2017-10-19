@@ -49,11 +49,14 @@ namespace Importer.Configuration
         private static Interfaces.ILog GetLogger(this IConfiguration config)
         {
             Interfaces.ILog logger;
-            if (!string.IsNullOrWhiteSpace(config.LogFileName))
+            if (config.LogFiles?.Count>0)
             {
                 var lg = new MultiLogger();
-                lg.AddLogger(new FileLogger(config.LogFileName));
                 lg.AddLogger(new ConsoleLogger(LogLevel.Info));
+                foreach (var configLogFile in config.LogFiles)
+                {
+                    lg.AddLogger(new FileLogger(configLogFile.Path,configLogFile.LogLevel));
+                }
                 logger = lg;
             }
             else

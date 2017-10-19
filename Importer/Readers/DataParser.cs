@@ -12,7 +12,7 @@ namespace Importer.Readers
 {
     public static partial class Readers
     {
-        public static Func<IDataRow> ParseData(this Func<ISourceRow> getLineFunc, IFile fileConfig, Interfaces.ILog logger)
+        public static Func<IDataRow> ParseData(this Func<ISourceRow> getLineFunc, IFileConfiguration fileConfig, Interfaces.ILog logger)
         {
             long sourceLineNumber = 0;
             long rowNumber = 0;
@@ -65,7 +65,7 @@ namespace Importer.Readers
             };
         }
 
-        private static Func<ISourceField, IValue> GetValueParser(this IColumn column, IFile fileConfig)
+        private static Func<ISourceField, IValue> GetValueParser(this IColumn column, IFileConfiguration fileConfig)
         {
             switch (column.Type)
             {
@@ -82,7 +82,7 @@ namespace Importer.Readers
             }
         }
 
-        private static Func<ISourceField, IValue> GetStringParser(string format, IFile fileConfig)
+        private static Func<ISourceField, IValue> GetStringParser(string format, IFileConfiguration fileConfig)
         {
             if (fileConfig.TrimStrings)
             {
@@ -181,7 +181,7 @@ namespace Importer.Readers
             };
         }
 
-        private static Func<ISourceRow,long,long, IDataRow> GetRowParsers(this IFile fileConfig)
+        private static Func<ISourceRow,long,long, IDataRow> GetRowParsers(this IFileConfiguration fileConfig)
         {
             var parsers= fileConfig.Rows.Select(x => x.GetRowParser(fileConfig)).ToList();
             return (source,rowNumber,rawLineNumber) =>
@@ -190,7 +190,7 @@ namespace Importer.Readers
             };
         }
 
-        private static Func<ISourceRow,long,long, IDataRow> GetRowParser(this IRow row, IFile fileConfig)
+        private static Func<ISourceRow,long,long, IDataRow> GetRowParser(this IRow row, IFileConfiguration fileConfig)
         {
             var filter = row.PrepareSourceFilter();
             var parsers = row.Columns.Select(x=>x.GetValueParser(fileConfig)).ToList();

@@ -17,12 +17,12 @@ namespace Importer.Writers
 {
 	public static partial class Writers
 	{
-		public static StreamWriter GetWaveStreamWriter(this IFile fileConfig, Interfaces.ILog log)
+		public static Stream GetWaveStreamWriter(this IFileMedia fileMedia, IFileConfiguration fileConfig, Interfaces.ILog log)
 		{
-			return new StreamWriter(new WaveStream(fileConfig,log),Encoding.UTF8);
+			return new WaveStream(fileMedia,fileConfig,log);
 		}
 
-		private static Func<string> GetMetadataBuilder(this IFile fileConfig)
+		private static Func<string> GetMetadataBuilder(this IFileConfiguration fileConfig)
 		{
 			if (!(fileConfig.Rows?.Count > 0))
 			{
@@ -88,12 +88,12 @@ namespace Importer.Writers
 			return () => xmdStr;
 		}
 
-		private static async Task<Func<MemoryStream, bool, int>> GetDataSenderFunc(this IFile fileConfig, Interfaces.ILog log)
+		private static async Task<Func<MemoryStream, bool, int>> GetDataSenderFunc(this IFileMedia fileMedia, IFileConfiguration fileConfig, Interfaces.ILog log)
 		{
 			var chunkNumber = 0;
 			var queue = new ConcurrentQueue<MemoryStream>();
 			var isFinalizing = false;
-			var uploader = await fileConfig.GetDataChunkUploader(log);
+			var uploader = await fileMedia.GetDataChunkUploader(fileConfig,log);
 			var senderTask=new Task(() =>
 			{
 				while (true)
@@ -179,9 +179,9 @@ namespace Importer.Writers
 			throw new ImporterUploadException($"{response.StatusCode} -{responseText}");
 		}
 
-		private static async Task<Func<MemoryStream,bool,int>> GetDataChunkUploader(this IFile fileConfig, Interfaces.ILog log)
+		private static async Task<Func<MemoryStream,bool,int>> GetDataChunkUploader(this IFileMedia fileMedia, IFileConfiguration fileConfig, Interfaces.ILog log)
 		{
-			var getContext = await fileConfig.GetWaveContextFunc(log);
+			var getContext = await fileMedia.GetWaveContextFunc(fileConfig.Name,log);
 			var xmdJson = fileConfig.GetMetadataBuilder();
 			var chunkNo = 0;
 			return (stream, isFinalizing) =>
@@ -189,7 +189,7 @@ namespace Importer.Writers
 				var context = getContext();
 				if (string.IsNullOrWhiteSpace(context.SetId))
 				{
-					context.InitiateDatasetUpload(xmdJson(),fileConfig.Operation, log).Wait();
+					context.InitiateDatasetUpload(xmdJson(),fileMedia.Operation, log).Wait();
 					if (string.IsNullOrWhiteSpace(context.SetId))
 					{
 						throw new ImporterException(
@@ -226,15 +226,15 @@ namespace Importer.Writers
 
 		}
 
-		private static async Task<Func<WaveContext>> GetWaveContextFunc(this IFile fileConfig,Interfaces.ILog log)
+		private static async Task<Func<WaveContext>> GetWaveContextFunc(this IFileMedia fileMedia,string fileName,Interfaces.ILog log)
 		{
 			var client = new HttpClient();
-			var url=$"{fileConfig.Path}/services/oauth2/token?grant_type=password&client_id={fileConfig.ClientId}&client_secret={fileConfig.ClientSecret}&username={fileConfig.Login}&password={fileConfig.Password}{fileConfig.Token}";
+			var url=$"{fileMedia.ConnectionCredentials.EntryPoint}/services/oauth2/token?grant_type=password&client_id={fileMedia.ConnectionCredentials.ClientId}&client_secret={fileMedia.ConnectionCredentials.ClientSecret}&username={fileMedia.ConnectionCredentials.Login}&password={fileMedia.ConnectionCredentials.Password}{fileMedia.ConnectionCredentials.Token}";
 			var content = new StringContent(string.Empty);
 			content.Headers.ContentType=new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 			log.Info(string.Format(
 				Localization.GetLocalizationString("Obtaining access token and entry point from \"{0}\" for \"{1}\""),
-				fileConfig.Path, fileConfig.Login));			
+				fileMedia.ConnectionCredentials.EntryPoint, fileMedia.ConnectionCredentials.Login));			
 			var response = await client.PostAsync(url, content);
 			WaveContext context = null;
 			if (response.IsSuccessStatusCode)
@@ -246,7 +246,7 @@ namespace Importer.Writers
 				{
 					Token = result.access_token,
 					EntryPoint = result.instance_url,
-					Alias = fileConfig.Name.Replace(" ","_")
+					Alias = fileName.Replace(" ","_")
 				};
 			}
 			else

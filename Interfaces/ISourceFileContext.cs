@@ -7,6 +7,7 @@ namespace Interfaces
 	{
 		string SourcePath { get; }
 		StreamReader Stream { get; }
-		IFile FileConfiguration { get; }
+		IFileMedia FileMedia { get; }
+		IFileConfiguration FileConfiguration { get; }
 	}
 }
