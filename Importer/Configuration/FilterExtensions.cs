@@ -20,7 +20,7 @@ namespace Importer.Configuration
             {
                 return source =>
                 {
-                    return row.Filter.All(f => source[f.Name].ToString() == f.Value);
+                    return row.Filter.Any(f => source[f.Name].ToString() == f.Value);
                 };
             }
             return source => true;

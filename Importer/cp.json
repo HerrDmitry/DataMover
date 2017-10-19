@@ -20,7 +20,7 @@
             {"name": "Flag","type": "integer", "width":2},
             {"name": "BatchNo","type": "integer", "width":3},
             {"name": "BatchSeqNo","type": "integer", "width":3},
-            {"name": "MoneyOrderSerial","type": "string", "width":9},
+            {"name": "MoneyOrderSerial","type": "integer", "width":9},
             {"name": "CanAmount","type": "money", "width":6},
             {"name": "IssueDate","type": "date", "width":6, "format":"ddMMyy"},
             {"name": "RunDate","type": "string", "width":5},
@@ -34,7 +34,7 @@
             {"name": "TrayNoRep","type": "integer", "width":2},
             {"name": "SeqNoInTray","type": "integer", "width":5},
             {"name": "ErrorFlag","type": "integer", "width":3},
-            {"name": "TransactionNo","type": "string", "width":8},
+            {"name": "TransactionNo","type": "integer", "width":8},
             {"name": "EOD","type": "integer", "width":5},
             {"name": "CODRef","type": "string", "width":35},
             {"name": "Payee Name","type": "string", "width":40},
@@ -61,6 +61,7 @@
 			"format":"csv",
 			"delimiter":"|",
 			"trimStrings":true,
+			"disabled":false,
 			"rows":[
 				{
 					"columns":[{"name":"RecordType","type":"string"}],
@@ -92,7 +93,7 @@
 						{"name":"LegacyReferenceNumber", "type":"string"},
 						{"name":"TransactionDate", "type":"date", "format":"yyyyMMdd"},
 						{"name":"TransactionTime", "type":"date","format":"HHmmss"},
-						{"name":"AgentStoreNumber", "type":"string"},
+						{"name":"AgentStoreNumber", "type":"integer"},
 						{"name":"FaceValue", "type":"money"},
 						{"name":"Fee", "type":"money"},
 						{"name":"Comission", "type":"money"},
@@ -132,7 +133,7 @@
 						{"name":"LegacyReferenceNumber", "type":"string"},
 						{"name":"TransactionDate", "type":"date", "format":"yyyyMMdd"},
 						{"name":"TransactionTime", "type":"date","format":"HHmmss"},
-						{"name":"AgentStoreNumber", "type":"string"},
+						{"name":"AgentStoreNumber", "type":"integer"},
 						{"name":"FaceValue", "type":"money"},
 						{"name":"Fee", "type":"money"},
 						{"name":"Comission", "type":"money"},
@@ -175,7 +176,7 @@
 						{"name":"LegacyReferenceNumber", "type":"string"},
 						{"name":"TransactionDate", "type":"date", "format":"yyyyMMdd"},
 						{"name":"TransactionTime", "type":"date","format":"HHmmss"},
-						{"name":"AgentStoreNumber", "type":"string"},
+						{"name":"AgentStoreNumber", "type":"integer"},
 						{"name":"FaceValue", "type":"money"},
 						{"name":"Fee", "type":"money"},
 						{"name":"Comission", "type":"money"},
@@ -214,7 +215,7 @@
 						{"name":"LegacyReferenceNumber", "type":"string"},
 						{"name":"TransactionDate", "type":"date", "format":"yyyyMMdd"},
 						{"name":"TransactionTime", "type":"date","format":"HHmmss"},
-						{"name":"AgentStoreNumber", "type":"string"},
+						{"name":"AgentStoreNumber", "type":"integer"},
 						{"name":"FaceValue", "type":"money"},
 						{"name":"Fee", "type":"money"},
 						{"name":"Comission", "type":"money"},
@@ -356,6 +357,63 @@
 			]
 		},
     {
+	    "name":"MG Wave",
+	    "path":"https://login.salesforce.com",
+	    "format":"csv",
+	    "media":"wave",
+	    "delimiter":",",
+	    "disabled":false,
+	    "surroundedQualifier":"double",
+	    "operation":"overwrite",
+	    "source":"Money Gram",
+      "rows":[
+        {
+	        "columns":[
+		        {"name":"RecordType","type":"string"},
+		        {"name":"TransactionType","type":"string"},
+		        {"name":"SettlementAgentId", "type":"string"},
+		        {"name":"LegacyUnitOffice", "type":"string"},
+		        {"name":"LegacyAgentId", "type":"string"},
+		        {"name":"LegacyReferenceNumber", "type":"string"},
+		        {"name":"TransactionDate", "type":"date", "format":"yyyy-MM-dd"},
+		        {"name":"TransactionTime", "type":"string", "format":"hh:mm:ss"},
+		        {"name":"AgentStoreNumber", "type":"string"},
+		        {"name":"FaceValue", "type":"money"},
+		        {"name":"Fee", "type":"money"},
+		        {"name":"Comission", "type":"money"},
+		        {"name":"SendCountry", "type":"string"}, 
+		        {"name":"ISOSendCountry", "type":"string"}, 
+		        {"name":"FirstName", "type":"string"},
+		        {"name":"MiddleInitial", "type":"string"},
+		        {"name":"LastName", "type":"string"},
+		        {"name":"Address", "type":"string"},
+		        {"name":"City", "type":"string"},
+		        {"name":"Province", "type":"string"},
+		        {"name":"PostalCode", "type":"string"},
+		        {"name":"Country", "type":"string"},
+		        {"name":"ISOCountry", "type":"string"},
+		        {"name":"Phone", "type":"string"},
+		        {"name":"PhotoId", "type":"string"},
+		        {"name":"PhotoIdType", "type":"string"},
+		        {"name":"DOB", "type":"string", "format":"yyMMdd"},
+		        {"name":"FName", "type":"string"},
+		        {"name":"MInitial", "type":"string"},
+		        {"name":"LName", "type":"string"},
+		        {"name":"DestCountry", "type":"string"},
+		        {"name":"ISODestCountry", "type":"string"},
+		        {"name":"Occupation", "type":"string"},
+		        {"name":"ReceiveCurrency", "type":"string"}
+	        ],
+	        "filter":[
+						{"name":"RecordType","value":"01"},
+						{"name":"RecordType","value":"02"},
+						{"name":"RecordType","value":"03"},
+						{"name":"RecordType","value":"04"}
+					]
+        }
+      ]
+    },
+    {
       "name":"MG",
       "path":"../../Data/CP/MG.csv",
       "format":"csv",
@@ -401,7 +459,13 @@
 		        {"name":"ISODestCountry", "type":"string"},
 		        {"name":"Occupation", "type":"string"},
 		        {"name":"ReceiveCurrency", "type":"string"}
-	        ]
+	        ],
+	        "filter":[
+						{"name":"RecordType","value":"01"},
+						{"name":"RecordType","value":"02"},
+						{"name":"RecordType","value":"03"},
+						{"name":"RecordType","value":"04"}
+					]
         }
       ]
     }
