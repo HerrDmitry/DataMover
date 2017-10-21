@@ -7,5 +7,6 @@ namespace Importer.Readers
 	{
 		public IReadOnlyList<ISourceField> Fields { get; set; }
 		public ISourceFileContext Context { get; set; }
+		public int LineNumber { get; set; }
 	}
 }

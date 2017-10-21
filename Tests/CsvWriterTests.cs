@@ -77,6 +77,7 @@ namespace Tests
             public long RawLineNumber { get; set; }
 
             public IValue this[string key] => Columns[key];
+            public string SourcePath { get; set; }
         }
 
         private class DateValue : Value<DateTime>
@@ -131,7 +132,16 @@ namespace Tests
             }
 
             public string Source { get; }
-        
+            public void Update(IValue newValue)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Update(AggregateMethod method, IValue value)
+            {
+                throw new NotImplementedException();
+            }
+
             public abstract string ToString(string format);
 
             public override string ToString()

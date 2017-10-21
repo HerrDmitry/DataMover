@@ -67,7 +67,7 @@ namespace Importer.Writers
 			}
 		}
 
-		public void Dispose()
+		public new void Dispose()
 		{
 			foreach (var stream in underlyingStreams)
 			{

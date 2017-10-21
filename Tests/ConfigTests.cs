@@ -25,7 +25,6 @@ namespace Tests
     {
       'name': 'transactions',
       'path': 'transactions.txt',
-      'media': 'ftp',
       'format': 'csv',
       'delimiter': ',',
       'qualifier': '\'',
@@ -49,7 +48,6 @@ namespace Tests
       'name':'headers',
       'path':'headers.txt',
       'format':'csv',
-      'media':'local',
       'delimiter':',',
       'rows':[{'columns':[{'name':'id1'},{'name':'id2'},{'name':'id3'}],
       'filter':[{'name':'selector','value':'HDR'}]

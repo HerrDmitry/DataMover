@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Importer;
 using Importer.Configuration;
 using Importer.Readers;
 using Interfaces;
 using Interfaces.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using File = Importer.Configuration.File;
 
 namespace Tests
 {
@@ -17,7 +19,10 @@ namespace Tests
 		{
 			var source = "\r123321101someextratext\r\n321123222";
 			var stream = base.GetStreamFromString(source);
-			var data = stream.BufferedRead(new ConsoleLogger()).FixedWidthReader(getConfig(), new ConsoleLogger())
+			var context = new SourceFileContext();
+			context.Stream = new StreamReader(stream);
+			context.FileConfiguration = getConfig();
+			var data = context.BufferedRead(new ConsoleLogger()).FixedWidthReader(context, new ConsoleLogger())
 				.ParseData(getConfig(), new ConsoleLogger());
 			var row = data();
 			Assert.IsNotNull(row);

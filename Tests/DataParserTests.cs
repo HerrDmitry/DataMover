@@ -22,12 +22,16 @@ namespace Tests
         public void DataParserTest()
         {
             var s = "'a',1,'c',2,'2017-10-01 14:15:16'\n'a1',1.1,c1,3,'2017-10-04";
+            var context = new SourceFileContext();
             var stream = GetStreamFromString(s);
-            var reader = new StreamReader(stream).BufferedRead(new ConsoleLogger()).CsvReader( new File 
+            context.Stream = new StreamReader(stream);
+            context.FileConfiguration = new File
             {
                 Delimiter = ",",
                 Qualifier = "'"
-            },  new ConsoleLogger());
+            };
+            var log = new ConsoleLogger();
+            var reader = context.BufferedRead(log).CsvReader(context, log);
             var parser = reader.ParseData(getConfig(), new ConsoleLogger());
             var row = parser();
             Assert.IsNotNull(row);
@@ -52,12 +56,16 @@ namespace Tests
         public void DataParserTestNullValue()
         {
             var s = "'a',1,,2,'2017-10-01 14:15:16'\n'a1',1.1,c1,3,'2017-10-04";
+            var context = new SourceFileContext();
             var stream = GetStreamFromString(s);
-            var reader = new StreamReader(stream).BufferedRead(new ConsoleLogger()).CsvReader(new File
+            context.Stream = new StreamReader(stream);
+            context.FileConfiguration = new File
             {
                 Delimiter = ",",
                 Qualifier = "'"
-            }, new ConsoleLogger());
+            };
+            var log = new ConsoleLogger();
+            var reader = context.BufferedRead(log).CsvReader(context,  log);
             var parser = reader.ParseData(getConfig(), new ConsoleLogger());
             var row = parser();
             Console.WriteLine(row.Error);

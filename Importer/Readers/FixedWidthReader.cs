@@ -12,14 +12,14 @@ namespace Importer.Readers
 	{
 		public static Func<ISourceRow> FixedWidthReader(this Func<int> readNext, ISourceFileContext context, Interfaces.ILog logger)
 		{
-			if (context?.FileMedia==null)
+			if (context?.FileConfiguration==null)
 			{
 				var msg = Localization.GetLocalizationString("Could not get Source Configuration...");
 				logger?.Fatal(msg);
 				throw new ArgumentException(msg);
 			}
 			var locker = new object();
-			long rowCount = 0;
+			var rowCount = 0;
 			logger?.Info(string.Format(Localization.GetLocalizationString("Loading data from {0}..."), context.FileConfiguration.Name));
 			var lineReaders = context.FileConfiguration.Rows.Select(x => x.GetLineFunc(context.FileConfiguration)).ToList();
 
@@ -32,7 +32,7 @@ namespace Importer.Readers
 					{
 						result.AddRange(reader(readNext));
 					}
-					return result.Count > 0 ? new SourceRow {Context = context, Fields = result} : null;
+					return result.Count > 0 ? new SourceRow {Context = context, Fields = result, LineNumber = ++rowCount} : null;
 				}
 			};
 		}

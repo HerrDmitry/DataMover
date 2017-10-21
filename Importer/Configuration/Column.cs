@@ -9,6 +9,10 @@ namespace Importer.Configuration
     {
         [JsonProperty("name")]
         public string Name { get; set; }
+
+        [JsonProperty("alias")]
+        public string Alias { get; set; }
+
         [JsonProperty("format")]
         public string Format { get; set; }
         [JsonProperty("type")]
@@ -19,5 +23,10 @@ namespace Importer.Configuration
         public CalendarType? CalendarType { get; set; }
         [JsonProperty("description")]
         public string Description { get; set; }
+
+        [JsonProperty("isKey")]
+        public bool GroupKey { get; set; }
+        [JsonProperty("aggregatemethod")]
+        public AggregateMethod AggregateMethod { get; set; }
     }
 }

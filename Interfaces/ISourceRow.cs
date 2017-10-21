@@ -6,5 +6,6 @@ namespace Interfaces
 	{
 		IReadOnlyList<ISourceField> Fields { get; }
 		ISourceFileContext Context { get; }
+		int LineNumber { get; }
 	}
 }

@@ -10,11 +10,8 @@ namespace Importer.Writers
 		{
 			private Interfaces.ILog logger;
 			private IFileConfiguration fileConfig;
-			private IFileMedia fileMedia;
-			private Func<string> metadataBuilder;
 			private MemoryStream ms;
 			private readonly Func<MemoryStream, bool, int> writeToWaveFunc;
-			private long recordCount;
 			public WaveStream(IFileMedia fileMedia,IFileConfiguration fileConfig, Interfaces.ILog log)
 			{
 				this.logger = log;

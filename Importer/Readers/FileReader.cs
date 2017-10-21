@@ -87,9 +87,9 @@ namespace Importer.Readers
             switch (fileConfig.Format)
             {
                 case FileFormat.Fixed:
-                    return context => context?.BufferedRead(logger).FixedWidthReader(context, logger).ParseData(fileConfig, logger);
+                    return context => context?.BufferedRead(logger).FixedWidthReader(context, logger).ParseData(context.FileConfiguration, logger);
                 case FileFormat.CSV:
-                    return context => context?.BufferedRead(logger).CsvReader(context, fileConfig, logger).ParseData(fileConfig, logger);
+                    return context => context?.BufferedRead(logger).CsvReader(context, logger).ParseData(context.FileConfiguration, logger);
                 default:
                     return null;
             }

@@ -14,6 +14,8 @@ namespace Importer.Configuration
 
         [JsonIgnore]
         public IList<ILogConfiguration> LogFiles { get; private set; }
+        [JsonIgnore]
+        public IList<ICredentials> Credentials { get; private set; }
 
         [JsonProperty("sources")]
         public List<File> SourcesInternal
@@ -30,6 +32,12 @@ namespace Importer.Configuration
         public List<Log> LogFilesInternal
         {
             set => LogFiles = value?.Cast<ILogConfiguration>().ToList();
+        }
+
+        [JsonProperty("credentials")]
+        public List<Credentials> CredentialsInternal
+        {
+            set => Credentials = value?.Cast<ICredentials>().ToList();
         }
     }
 }

@@ -14,8 +14,6 @@ namespace Importer.Readers
     {
         public static Func<IDataRow> ParseData(this Func<ISourceRow> getLineFunc, IFileConfiguration fileConfig, Interfaces.ILog logger)
         {
-            long sourceLineNumber = 0;
-            long rowNumber = 0;
             if (fileConfig==null)
             {
                 var msg = Localization.GetLocalizationString("Could not get Source Configuration...");
@@ -57,7 +55,7 @@ namespace Importer.Readers
                                     Localization.GetLocalizationString("Parse error"), true, string.Join(",", line.Fields.Select(x => x.Source)))
                             }
                         },
-                        Localization.GetLocalizationString("Could not parse line."), currentRecord, currentRecord, line.Context.SourcePath);
+                        Localization.GetLocalizationString("Could not parse line."),currentRecord, line.LineNumber, line.Context.SourcePath);
                 }
                 
                 logger?.Info(string.Format(Localization.GetLocalizationString("Parsed {0}/{1} records from {2}"),parsedRecords,currentRecord,fileConfig.Name));
@@ -237,9 +235,43 @@ namespace Importer.Readers
                 this.Source = source;
             }
 
-            private readonly T Value;
+            private T Value;
             private readonly string Error;
             public string Source { get; }
+            public void Update(IValue newValue)
+            {
+                this.Update(AggregateMethod.Last, newValue);
+            }
+
+            public void Update(AggregateMethod method, IValue value)
+            {
+                if (value is IValue<T> typedValue)
+                {
+                    switch (method)
+                    {
+                        case AggregateMethod.Last:
+                            this.Value = typedValue.GetValue();
+                            break;
+                        case AggregateMethod.Join:
+                            if (typeof(T)==typeof(string))
+                            {
+                                var stringValue = value as IValue<string>;
+                                if ( this.Value==null || (this.Value as string)?.Contains(stringValue.GetValue())==false)
+                                {
+                                    (this as ValueWrapper<string>).Value = string.Concat((this.Value as string)??"", ",", stringValue.GetValue());
+                                }
+                            }
+                            break;
+                        case AggregateMethod.Sum:
+                            if (typeof(T) == typeof(long))
+                            {
+                                (this as ValueWrapper<long>).Value += (value as IValue<long>)?.GetValue() ?? 0;
+                            }
+                            break;
+                    }
+                }
+                
+            }
 
             public T GetValue()
             {

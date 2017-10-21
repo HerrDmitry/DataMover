@@ -46,7 +46,6 @@ namespace Importer
             }
             for (var i = 1; i < args.Length; i++)
             {
-                bool isUpdated = false;
                 var argPair = args[i].Split(":", StringSplitOptions.RemoveEmptyEntries);
                 if (argPair.Length == 2)
                 {
@@ -58,6 +57,7 @@ namespace Importer
 
                         if (objectName.Length > 0)
                         {
+                            config.Credentials.Cast<Credentials>().UpdateCredentials(objectName, fieldName, argPair[1]);
                             config.Sources.Cast<File>().UpdateFileConfiguration(objectName,fieldName,argPair[1]);
                             config.Targets.Cast<File>().UpdateFileConfiguration(objectName,fieldName,argPair[1]);
                         }
@@ -68,6 +68,35 @@ namespace Importer
             return config;
         }
 
+        private static void UpdateCredentials(this IEnumerable<Credentials> credentials, string name, string field,
+            string value)
+        {
+            foreach (var c in credentials)
+            {
+                if (c.Name == name)
+                {
+                    switch (field.ToUpper())
+                    {
+                        case "LOGIN":
+                            c.Login = value;
+                            return;
+                        case "PASSWORD":
+                            c.Password = value;
+                            return;
+                        case "TOKEN":
+                            c.Token = value;
+                            return;
+                        case "CLIENTID":
+                            c.ClientId = value;
+                            return;
+                        case "CLIENTSECRET":
+                            c.ClientSecret = value;
+                            return;
+                    }
+                }
+            }
+        }
+
         private static void UpdateFileConfiguration(this IEnumerable<File> fileConfigs, string name, string field,
             string value)
         {
@@ -75,24 +104,6 @@ namespace Importer
             {
                 if (fileConfig.Name == name)
                 {
-                    switch (field.ToUpper())
-                    {
-                        case "LOGIN":
-                            fileConfig.Login = value;
-                            return;
-                        case "PASSWORD":
-                            fileConfig.Password = value;
-                            return;
-                        case "TOKEN":
-                            fileConfig.Token = value;
-                            return;
-                        case "CLIENTID":
-                            fileConfig.ClientId = value;
-                            return;
-                        case "CLIENTSECRET":
-                            fileConfig.ClientSecret = value;
-                            return;
-                    }
                 }
             }
         }

@@ -9,8 +9,9 @@ namespace Importer.Readers
 {
     public static partial class Readers
     {
-        public static Func<ISourceRow> CsvReader(this Func<int> readNext, ISourceFileContext context, ICsvFile fileConfig, Interfaces.ILog logger)
+        public static Func<ISourceRow> CsvReader(this Func<int> readNext, ISourceFileContext context, Interfaces.ILog logger)
         {
+            var fileConfig = context.FileConfiguration;
             if (fileConfig==null)
             {
                 var msg = Localization.GetLocalizationString("Could not get Source Configuration...");
@@ -23,7 +24,7 @@ namespace Importer.Readers
             var qualifier = string.IsNullOrWhiteSpace(fileConfig.Qualifier) ? 0 : fileConfig.Qualifier[0];
 
             var locker = new object();
-            long rowCount = 0;
+            var rowCount = 0;
             logger?.Info(string.Format(Localization.GetLocalizationString("Loading data from {0}..."), fileConfig.Name));
             return () =>
             {
@@ -81,7 +82,7 @@ namespace Importer.Readers
                     }
 
                     rowCount++;
-                    return new SourceRow {Context = context, Fields = columns};
+                    return new SourceRow {Context = context, Fields = columns, LineNumber=rowCount};
                 }
             };
         }

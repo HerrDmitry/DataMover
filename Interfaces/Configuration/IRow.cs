@@ -6,5 +6,6 @@ namespace Interfaces.Configuration
     {
         IList<IColumn> Columns { get; }
         IList<IFilter> Filter { get; }
+        
     }
 }
