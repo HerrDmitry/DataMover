@@ -66,7 +66,7 @@ namespace Tests
             stream.Position = 0;
             var sr = new StreamReader(stream);
             var myStr = sr.ReadToEnd();
-            Assert.AreEqual("123,05102017,\"a,b,\\\"c\\\"\"\n321,06102017,\"a\\\"b\"\n",myStr);
+            Assert.AreEqual("123,05102017,\"a,b,\\\"c\\\"\""+Environment.NewLine+"321,06102017,\"a\\\"b\""+Environment.NewLine,myStr);
         }
 
         private class DataRow : IDataRow
