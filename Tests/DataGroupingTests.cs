@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Collections.Generic;
+using Interfaces;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
@@ -8,6 +10,7 @@ namespace Tests
 		[TestMethod]
 		public void TestGrouping()
 		{
+			var rows = new List<IDataRow>();
 		}
 	}
 }
