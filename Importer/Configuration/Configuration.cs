@@ -15,7 +15,7 @@ namespace Importer.Configuration
         [JsonIgnore]
         public IList<ILogConfiguration> LogFiles { get; private set; }
         [JsonIgnore]
-        public IList<ICredentials> Credentials { get; private set; }
+        public IDictionary<string,ICredentials> Credentials { get; private set; }
 
         [JsonProperty("sources")]
         public List<File> SourcesInternal
@@ -37,7 +37,17 @@ namespace Importer.Configuration
         [JsonProperty("credentials")]
         public List<Credentials> CredentialsInternal
         {
-            set => Credentials = value?.Cast<ICredentials>().ToList();
+            set
+            {
+                this.Credentials = new Dictionary<string, ICredentials>();
+                if (value != null)
+                {
+                    foreach (var v in value)
+                    {
+                        this.Credentials[v.Name] = v;
+                    }
+                }
+            }
         }
     }
 }

@@ -65,9 +65,9 @@ namespace Importer.Writers
 									field.Type = XMD.XMDFieldType.Text;
 									break;
 							}
-							field.Name = c.Name.Replace(" ", "_");
+							field.Name = (c.Alias??c.Name).Replace(" ", "_");
 							field.FullyQualifiedName = fileConfig.Name.Replace(" ", "_") + "." + field.Name;
-							field.Label = c.Name;
+							field.Label = field.Name;
 							field.Description = c.Description;
 							if (field.Type == XMD.XMDFieldType.Numeric)
 							{

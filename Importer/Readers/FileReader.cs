@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Interfaces;
 using Interfaces.Configuration;
 
@@ -119,7 +120,7 @@ namespace Importer.Readers
                         return new SourceFileContext
                         {
                             SourcePath = file,
-                            Stream = file.GetLocalFileStream(logger),
+                            Stream = file.GetLocalFileStream(fileMedia.Encoding.GetFilEncoding(), logger),
                             FileMedia = fileMedia,
                             FileConfiguration = fileConfig
                         };
@@ -128,7 +129,28 @@ namespace Importer.Readers
             return null;
         }
 
-        private static StreamReader GetLocalFileStream(this string filePath, Interfaces.ILog logger)
+        private static Encoding GetFilEncoding(this FileEncoding fileEncoding)
+        {
+            switch (fileEncoding)
+            {
+                case FileEncoding.ASCII:
+                    return Encoding.ASCII;
+                case FileEncoding.BigEndianUnicode:
+                    return Encoding.BigEndianUnicode;
+                case FileEncoding.Unicode:
+                    return Encoding.Unicode;
+                case FileEncoding.UTF7:
+                    return Encoding.UTF7;
+                case FileEncoding.UTF8:
+                    return Encoding.UTF8;
+                case FileEncoding.UTF32:
+                    return Encoding.UTF32;
+                default:
+                    return Encoding.Default;
+            }
+        }
+
+        private static StreamReader GetLocalFileStream(this string filePath, Encoding encoding, Interfaces.ILog logger)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
@@ -137,7 +159,7 @@ namespace Importer.Readers
             
             logger.Debug(string.Format(Localization.GetLocalizationString("Opening source file \"{0}\""),
                 filePath));
-            return new StreamReader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+            return new StreamReader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read),encoding);
         }
     }
 }

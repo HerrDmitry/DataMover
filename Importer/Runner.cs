@@ -26,7 +26,8 @@ namespace Importer
             {
                 var watch = new Stopwatch();
                 watch.Start();
-                context.GetDataWriter()(context.GetDataReader());
+                var dataReader = context.GetDataReader();
+                context.GetDataWriter()(dataReader);
                 watch.Stop();
                 context.Log.Info(string.Format(Localization.GetLocalizationString("Import finished in {0}"),
                     watch.GetTime()));
@@ -57,9 +58,9 @@ namespace Importer
 
                         if (objectName.Length > 0)
                         {
-                            config.Credentials.Cast<Credentials>().UpdateCredentials(objectName, fieldName, argPair[1]);
-                            config.Sources.Cast<File>().UpdateFileConfiguration(objectName,fieldName,argPair[1]);
-                            config.Targets.Cast<File>().UpdateFileConfiguration(objectName,fieldName,argPair[1]);
+                            config.Credentials.UpdateCredentials(objectName, fieldName, argPair[1]);
+                            config.Sources.UpdateConnectionCredentials(config.Credentials);
+                            config.Targets.UpdateConnectionCredentials(config.Credentials);
                         }
                     }
                 }
@@ -68,31 +69,47 @@ namespace Importer
             return config;
         }
 
-        private static void UpdateCredentials(this IEnumerable<Credentials> credentials, string name, string field,
+        private static void UpdateConnectionCredentials(this IList<IFile> files, IDictionary<string,ICredentials> credentials)
+        {
+            foreach (var file in files)
+            {
+                if (file.Media != null)
+                {
+                    (file.Media as FileMedia).ConnectionCredentials = credentials.TryGetValueDefault(file.Media.Credentials);
+                }
+                if (file.MultipleMedia != null)
+                {
+                    foreach (var mm in file.MultipleMedia)
+                    {
+                        (mm as FileMedia).ConnectionCredentials = credentials.TryGetValueDefault(mm.Credentials);
+                    }
+                }
+            }
+        }
+
+        private static void UpdateCredentials(this IDictionary<string, ICredentials> credentials, string name,
+            string field,
             string value)
         {
-            foreach (var c in credentials)
+            if (credentials.TryGetValueDefault(name) is Credentials c)
             {
-                if (c.Name == name)
+                switch (field.ToUpper())
                 {
-                    switch (field.ToUpper())
-                    {
-                        case "LOGIN":
-                            c.Login = value;
-                            return;
-                        case "PASSWORD":
-                            c.Password = value;
-                            return;
-                        case "TOKEN":
-                            c.Token = value;
-                            return;
-                        case "CLIENTID":
-                            c.ClientId = value;
-                            return;
-                        case "CLIENTSECRET":
-                            c.ClientSecret = value;
-                            return;
-                    }
+                    case "LOGIN":
+                        c.Login = value;
+                        return;
+                    case "PASSWORD":
+                        c.Password = value;
+                        return;
+                    case "TOKEN":
+                        c.Token = value;
+                        return;
+                    case "CLIENTID":
+                        c.ClientId = value;
+                        return;
+                    case "CLIENTSECRET":
+                        c.ClientSecret = value;
+                        return;
                 }
             }
         }

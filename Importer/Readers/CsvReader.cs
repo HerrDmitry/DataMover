@@ -21,7 +21,7 @@ namespace Importer.Readers
 
             var nullValue = string.IsNullOrWhiteSpace(fileConfig.NullValue) ? "" : fileConfig.NullValue;
             var delimiter = string.IsNullOrWhiteSpace(fileConfig.Delimiter) ? ',' : fileConfig.Delimiter[0];
-            var qualifier = string.IsNullOrWhiteSpace(fileConfig.Qualifier) ? 0 : fileConfig.Qualifier[0];
+            var qualifier = string.IsNullOrWhiteSpace(fileConfig.Qualifier) ? '\"' : fileConfig.Qualifier[0];
 
             var locker = new object();
             var rowCount = 0;

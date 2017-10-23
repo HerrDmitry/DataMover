@@ -2,9 +2,10 @@
 {
 	public enum AggregateMethod
 	{
+		Join,
+		FullJoin,
 		Last,
 		First,
-		Join,
 		Sum
 	}
 }

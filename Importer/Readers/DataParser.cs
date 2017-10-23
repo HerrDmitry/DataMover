@@ -68,12 +68,12 @@ namespace Importer.Readers
             switch (column.Type)
             {
                 case ColumnType.Integer:
-                    return GetIntegerParser(column.Format);
+                    return column.GetIntegerParser<ISourceField>();
                 case ColumnType.Decimal:
                 case ColumnType.Money:
-                    return GetDecimalParser(column.Format);
+                    return column.GetDecimalParser<ISourceField>();
                 case ColumnType.Date:
-                    return column.GetDateTimeParser();
+                    return column.GetDateTimeParser<ISourceField>();
                 case ColumnType.String:
                 default:
                     return GetStringParser(column.Format, fileConfig);
@@ -89,13 +89,19 @@ namespace Importer.Readers
             return source => new ValueWrapper<string>(source.Source, null, source.Source==null, source.Source);
         }
 
-        private static Func<ISourceField, IValue> GetDateTimeParser(this IColumn column)
+        internal static Func<T, IValue> GetDateTimeParser<T>(this IColumn column) where T:ISourceField
+        {
+            var parser = column.GetDateTimeParser();
+            return source => parser(source.Source);
+        }
+
+        internal static Func<string, IValue> GetDateTimeParser(this IColumn column)
         {
             return source =>
             {
-                if (source?.Source == null)
+                if (source == null)
                 {
-                    return new DateValueWrapper(DateTime.MinValue, null, true, null);
+                    return new ValueWrapper<DateTime>(DateTime.MinValue, null, true, null);
                 }
                 DateTime value = default;
                 var sourceStr = source.ToString();
@@ -117,30 +123,40 @@ namespace Importer.Readers
                     value = new JulianCalendar().ToDateTime(value.Year, value.Month, value.Day, value.Hour,
                         value.Minute, value.Second, value.Millisecond);
                 }
-                var error = hasError ? Localization.GetLocalizationString("Could not parse date \"{0}\" ",source.Source) : null;
+                string error = null;
+                if (hasError)
+                {
+                    error = Localization.GetLocalizationString("Could not parse date \"{0}\" ", source);
+                }
 
-                return new DateValueWrapper(value, error, false, source.Source);
+                return new ValueWrapper<DateTime>(value, error, false, source);
             };
         }
 
-        private static Func<ISourceField, IValue> GetDecimalParser(string format)
+        internal static Func<T, IValue> GetDecimalParser<T>(this IColumn column) where T:ISourceField
+        {
+            var parser = column.GetDecimalParser();
+            return source => parser(source?.Source);
+        }
+
+        internal static Func<string, IValue> GetDecimalParser(this IColumn column)
         {
             return source =>
             {
-                if (source?.Source == null)
+                if (source == null)
                 {
                     return new ValueWrapper<decimal>(0,null,true, null);
                 }
                 var dec = '.';
                 var neg = '-';
-                if (!string.IsNullOrWhiteSpace(format))
+                if (!string.IsNullOrWhiteSpace(column.Format))
                 {
-                    dec = format[0];
+                    dec = column.Format[0];
                 }
                 var normalizedSource = new StringBuilder();
-                for (var i = 0; i < source.Source.Length; i++)
+                for (var i = 0; i < source.Length; i++)
                 {
-                    var c = source.Source[i];
+                    var c = source[i];
                     if (c < '0' && c > '9' && c != dec && (c != neg || neg == 0))
                     {
                         continue;
@@ -152,30 +168,36 @@ namespace Importer.Readers
                 if (!decimal.TryParse(normalizedSource.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture,
                     out decimal value))
                 {
-                    error = Localization.GetLocalizationString("Could not parse decimal \"{0}\" ",source.Source);
+                    error = Localization.GetLocalizationString("Could not parse decimal \"{0}\" ",source);
                 }
-                return new ValueWrapper<decimal>(value, error, false, source.Source);
+                return new ValueWrapper<decimal>(value, error, false, source);
             };
         }
 
-        private static Func<ISourceField, IValue> GetIntegerParser(string format)
+        internal static Func<T, IValue> GetIntegerParser<T>(this IColumn column) where T : ISourceField
+        {
+            var parser = column.GetIntegerParser();
+            return source => parser(source?.Source);
+        }
+
+        internal static Func<string, IValue> GetIntegerParser(this IColumn column)
         {
             return source =>
             {
-                if (source?.Source == null)
+                if (source == null)
                 {
                     return new ValueWrapper<long>(0, null, true, null);
                 }
-                if (!string.IsNullOrWhiteSpace(format))
+                if (!string.IsNullOrWhiteSpace(column.Format))
                 {
                 }
                 string error = null;
                 if (!long.TryParse(source.ToString(), out var value))
                 {
-                    error = Localization.GetLocalizationString("Could not parse integer \"{0}\" ",source.Source);
+                    error = Localization.GetLocalizationString("Could not parse integer \"{0}\" ",source);
                 }
 
-                return new ValueWrapper<long>(value, error, false, source.Source);
+                return new ValueWrapper<long>(value, error, false, source);
             };
         }
 
@@ -211,110 +233,6 @@ namespace Importer.Readers
                 }
                 return new DataRow(values, error.ToString(), rowNumber, rawLineNumber,source.Context.SourcePath);
             };
-        }
-
-        private class DateValueWrapper : ValueWrapper<DateTime>
-        {
-            public DateValueWrapper(DateTime value, string error, bool isNull, string source) : base(value, error, isNull, source)
-            {
-            }
-
-            public override string ToString(string format)
-            {
-                return this.GetValue().ToString(format);
-            }
-        }
-
-        private class ValueWrapper<T>:IValue<T>
-        {
-            public ValueWrapper(T value, string error, bool isNull,string source)
-            {
-                this.Value = value;
-                this.Error = error;
-                this.IsNull = isNull;
-                this.Source = source;
-            }
-
-            private T Value;
-            private readonly string Error;
-            public string Source { get; }
-            public void Update(IValue newValue)
-            {
-                this.Update(AggregateMethod.Last, newValue);
-            }
-
-            public void Update(AggregateMethod method, IValue value)
-            {
-                if (value is IValue<T> typedValue)
-                {
-                    switch (method)
-                    {
-                        case AggregateMethod.Last:
-                            this.Value = typedValue.GetValue();
-                            break;
-                        case AggregateMethod.Join:
-                            if (typeof(T)==typeof(string))
-                            {
-                                var stringValue = value as IValue<string>;
-                                if ( this.Value==null || (this.Value as string)?.Contains(stringValue.GetValue())==false)
-                                {
-                                    (this as ValueWrapper<string>).Value = string.Concat((this.Value as string)??"", ",", stringValue.GetValue());
-                                }
-                            }
-                            break;
-                        case AggregateMethod.Sum:
-                            if (typeof(T) == typeof(long))
-                            {
-                                (this as ValueWrapper<long>).Value += (value as IValue<long>)?.GetValue() ?? 0;
-                            }
-                            break;
-                    }
-                }
-                
-            }
-
-            public T GetValue()
-            {
-                return this.Value;
-            }
-
-            public virtual string ToString(string format)
-            {
-                return Value?.ToString();
-            }
-
-            public override string ToString()
-            {
-                return this.ToString(null);
-            }
-
-            public string GetError()
-            {
-                return this.Error;
-            }
-
-            public bool IsNull { get; }
-        }
-        
-        private class DataRow : IDataRow
-        {
-            public DataRow(IDictionary<string, IValue> columns, string error, long rowNumber,
-                long rawLineNumber, string sourcePath)
-            {
-                this.Columns = columns;
-                this.Error = error;
-                this.RowNumber = rowNumber;
-                this.RawLineNumber = rawLineNumber;
-                this.SourcePath = sourcePath;
-            }
-
-            public IDictionary<string, IValue> Columns { get; }
-            public string Error { get; }
-            public long RowNumber { get; }
-            public long RawLineNumber { get; }
-
-            public IValue this[string key] => this.Columns.TryGetValueDefault(key);
-            public string SourcePath { get; }
         }
 
         private class RowParser

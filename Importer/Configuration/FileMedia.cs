@@ -20,5 +20,8 @@ namespace Importer.Configuration
 		public string Credentials { get; set; }
 		[JsonIgnore]
 		public ICredentials ConnectionCredentials { get; set; }
+
+		[JsonProperty("encoding")]
+		public FileEncoding Encoding { get; set; }
 	}
 }

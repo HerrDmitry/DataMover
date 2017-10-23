@@ -19,8 +19,27 @@ namespace Importer.Writers
             var filters = fileConfig.Rows.Select(x => x.PrepareTargetFilter()).ToList();
             var rowCount = (long) 0;
             var getQualifiedString = fileConfig.GetQualifiedStrFunc(log);
+            bool isHeadersWritten = false;
             return row =>
             {
+                if (!isHeadersWritten && fileConfig.HasHeaders)
+                {
+                    var headers = new StringBuilder();
+                    for (var r = 0; r < fileConfig.Rows.Count; r++)
+                    {
+                        for (var c = 0; c < fileConfig.Rows[r].Columns.Count; c++)
+                        {
+                            if (c > 0)
+                            {
+                                headers.Append(delimiter);
+                            }
+                            headers.Append(fileConfig.Rows[r].Columns[c].Alias ?? fileConfig.Rows[r].Columns[c].Name);
+                        }
+                        headers.AppendLine();
+                    }
+                    stream.Write(headers.ToString());
+                    isHeadersWritten = true;
+                }
                 if (!string.IsNullOrWhiteSpace(row.Error))
                 {
                     return rowCount;
@@ -36,13 +55,13 @@ namespace Importer.Writers
                     for (var c = 0; c < columns.Count; c++)
                     {
                         var column = columns[c];
-                        var value = row[column.Name];
+                        var value = row[column.Alias??column.Name];
                         if (value == null)
                         {
                             //log.Warning(Localization.GetLocalizationString("Could not find column {0}", columns[c].Name));
                         }
                         
-                        var valueString = value != null ? getQualifiedString(value.ToString(column.Format),column.Type) : nullValue;
+                        var valueString = (value != null &&!value.IsNull) ? getQualifiedString(value.ToString(column.Format),column.Type) : nullValue;
                         rowString.Append(valueString);
                         if (columns.Count - 1 > c)
                         {
@@ -69,10 +88,14 @@ namespace Importer.Writers
         private static Func<string, ColumnType, string> GetQualifiedStrFunc(this ICsvFile fileConfig,ILog log)
         {
             var qualifier = fileConfig.Qualifier?.Length > 0 ? fileConfig.Qualifier[0].ToString() : DEFAULT_QUALIFIER;
+            if (fileConfig.FixForExcel)
+            {
+                qualifier = "\"";
+            }
             var delimiter = fileConfig.Delimiter?.Length > 0 ? fileConfig.Delimiter[0].ToString() : DEFAULT_DELIMITER;
-            var replaceQualifier = qualifier.getReplaceQualifierFunc(fileConfig.SurroundedQualifier, log);
-            
-            if (fileConfig.ForceQualifier)
+            var replaceQualifier = qualifier.getReplaceQualifierFunc(
+                fileConfig.FixForExcel ? SurroundedQualifierType.Double : fileConfig.SurroundedQualifier, log);
+            if (fileConfig.ForceQualifier || fileConfig.FixForExcel )
             {
                 return (source,type) =>
                 {
@@ -80,7 +103,12 @@ namespace Importer.Writers
                     {
                         source = "";
                     }
-                    return string.Concat(qualifier, replaceQualifier(source) ?? "", qualifier);
+                    var qualifiedStr = string.Concat(qualifier, replaceQualifier(source) ?? "", qualifier);
+                    if (fileConfig.FixForExcel)
+                    {
+                        return string.Concat(qualifier, "=", replaceQualifier(qualifiedStr), qualifier);
+                    }
+                    return qualifiedStr;
                 };
             }
 

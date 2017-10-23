@@ -18,10 +18,12 @@ namespace Interfaces.Configuration
 
     public interface ICsvFile:IHasNullableColumns,IFileName
     {
+        bool HasHeaders { get; }
         string Delimiter { get; }
         string Qualifier { get; }
         bool ForceQualifier { get; }
         SurroundedQualifierType SurroundedQualifier { get; }
+        bool FixForExcel { get; }
     }
     
     public interface IFixedWidthFile:IFileName
@@ -43,6 +45,7 @@ namespace Interfaces.Configuration
         string Credentials { get; }
         bool Disabled { get; }
         ICredentials ConnectionCredentials { get; }
+        FileEncoding Encoding { get; }
     }
 
     public interface ICredentials

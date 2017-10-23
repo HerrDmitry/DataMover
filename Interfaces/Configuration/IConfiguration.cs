@@ -7,6 +7,6 @@ namespace Interfaces.Configuration
         IList<IFile> Sources { get;}
         IList<IFile> Targets { get;}
         IList<ILogConfiguration> LogFiles { get; }
-        IList<ICredentials> Credentials { get; }
+        IDictionary<string,ICredentials> Credentials { get; }
     }
 }

@@ -12,8 +12,12 @@ namespace Importer.Configuration
         public string Delimiter { get; set; }
         [JsonProperty("qualifier")]
         public string Qualifier { get; set; }
+        [JsonProperty("hasHeaders")]
+        public bool HasHeaders { get; set; }
         [JsonProperty("forceQualifier")]
         public bool ForceQualifier { get; set; }
+        [JsonProperty("fixForExcel")]
+        public bool FixForExcel { get; set; }
         [JsonProperty("surroundedQualifier")]
         public SurroundedQualifierType SurroundedQualifier { get; set; }
         [JsonProperty("trimStrings")]

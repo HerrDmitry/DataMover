@@ -26,7 +26,7 @@ namespace Importer.Configuration
 
         [JsonProperty("isKey")]
         public bool GroupKey { get; set; }
-        [JsonProperty("aggregatemethod")]
+        [JsonProperty("aggregateMethod")]
         public AggregateMethod AggregateMethod { get; set; }
     }
 }

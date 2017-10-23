@@ -37,12 +37,12 @@ namespace Importer.Writers
         private static IList<Action<IDataRow>> ConfigureWriter(this Func<IFile> file, Interfaces.ILog log)
         {
             var writers = new List<Action<IDataRow>>();
-            IFile fileMedia;
-            while ((fileMedia = file()) != null)
+            IFile fileConfig;
+            while ((fileConfig = file()) != null)
             {
-                if (!fileMedia.Disabled)
+                if (!fileConfig.Disabled)
                 {
-                    var writer = fileMedia.GetWriter(log);
+                    var writer = fileConfig.GetWriter(log).GroupRecords(fileConfig,log);
                     if (writer != null)
                     {
                         writers.Add(writer);

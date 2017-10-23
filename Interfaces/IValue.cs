@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace Interfaces
 {
@@ -11,6 +12,8 @@ namespace Interfaces
         string Source { get; }
         void Update(IValue newValue);
         void Update(AggregateMethod method, IValue value);
+        Type GetValueType();
+        IValue Assign(IValue value);
     }
 
     public interface IValue<T> : IValue

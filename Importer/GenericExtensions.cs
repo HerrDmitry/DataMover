@@ -18,11 +18,15 @@ namespace Importer
         public static Func<T> GetNextFunc<T>(this IEnumerable<T> list)
         {
             var enumerator = list?.GetEnumerator();
-            return () => enumerator?.MoveNext() == true ? enumerator.Current : default(T);
+            return () => enumerator?.MoveNext() == true ? enumerator.Current : default;
         }
 
-        public static TV TryGetValueDefault<TK, TV>(this IDictionary<TK, TV> dict, TK key, TV defaultValue = default(TV))
+        public static TV TryGetValueDefault<TK, TV>(this IDictionary<TK, TV> dict, TK key, TV defaultValue = default)
         {
+            if (key == null)
+            {
+                return defaultValue;
+            }
             return !dict.TryGetValue(key, out var value) ? defaultValue : value;
         }
     }
