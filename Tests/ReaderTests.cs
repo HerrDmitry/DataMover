@@ -111,5 +111,29 @@ namespace Tests
             Assert.IsTrue(row.Fields[1].Source==null);
             Assert.AreEqual("c", row.Fields[2].ToString());
         }
+        
+        [TestMethod]
+        public void CsvReadTest5()
+        {
+            var s = "a\"b,,\"c\"\n\"d\",\"e\ne\",f";
+            var context = new SourceFileContext();
+            var stream = GetStreamFromString(s);
+            context.Stream = new StreamReader(stream);
+            context.FileConfiguration = new File
+            {
+                Delimiter = ",",
+                Qualifier = "\"",
+                Name="Test"
+            };
+            var log = new ConsoleLogger();
+
+            var reader = context.BufferedRead(log).CsvReader(context, log);
+            Assert.IsNotNull(reader);
+            var row = reader();
+            Assert.IsNotNull(row);
+            Assert.AreEqual("a\"b", row.Fields[0].ToString());
+            Assert.IsTrue(row.Fields[1].Source==null);
+            Assert.AreEqual("c", row.Fields[2].ToString());
+        }
     }
 }

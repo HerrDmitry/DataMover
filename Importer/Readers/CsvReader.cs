@@ -48,7 +48,7 @@ namespace Importer.Readers
                     var column=new StringBuilder();
                     while (c>=0)
                     {
-                        if (c == qualifier)
+                        if (c == qualifier && (column.Length==0 || hadQualifier))
                         {
                             hadQualifier = true;
                             isQualified = !isQualified;

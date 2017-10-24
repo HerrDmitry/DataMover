@@ -366,7 +366,8 @@
 			"name":"MO Historical",
 			"format":"csv",
 			"delimiter":"|",
-			"media":{"media":"local","path":"../../Data/CP/MO 2016.csv"},
+			"media":{"media":"local","path":"../../Data/CP/History/History - MO 201?.csv"},
+			"disabled":true,
 			"rows":[{
 				"columns":[
 					{"name":"FileDate","type":"date","format":"yyyy-MM-dd HH:mm:ss"},
@@ -395,6 +396,56 @@
 						{"name":"FeeCollected","type":"string"}
 				]
 			}
+			]
+		},{
+			"name":"MG Historical",
+			"format":"csv",
+			"delimiter":"|",
+			"qualifier":"я",
+			"media":{"media":"local","path":"../../Data/CP/History/History - MG 201?.csv"},
+			"rows":[
+				{"columns":[
+					{"name":"Record_Type","type":"string"},
+						{"name":"TransactionType","type":"string"},
+						{"name":"SettlementAgentID","type":"string"},
+						{"name":"LegacyUnitOfficeNo","type":"string"},
+						{"name":"LegacyAgentID","type":"string"},
+						{"name":"LegacyReferenceNumber","type":"string"},
+						{"name":"TransactionDate","type":"date", "format":"yyyyMMdd"},
+						{"name":"TransactionTime","type":"date", "format":"HHmmss"},
+						{"name":"AgentStoreNumber","type":"string"},
+						{"name":"FaceValue","type":"money"},
+						{"name":"Fee","type":"money"},
+						{"name":"Commission","type":"money"},
+						{"name":"SendCountry","type":"string"},
+						{"name":"ISOSendCountry","type":"string"},
+						{"name":"FirstName","type":"string"},
+						{"name":"MiddleInitial","type":"string"},
+						{"name":"LastName","type":"string"},
+						{"name":"Address","type":"string"},
+						{"name":"City","type":"string"},
+						{"name":"Province","type":"string"},
+						{"name":"PostalCode","type":"string"},
+						{"name":"SenderReceiverCountry","type":"string"},
+						{"name":"ISOSenderReceiverCountry","type":"string"},
+						{"name":"SenderPhone","type":"string"},
+						{"name":"PhotoID","type":"string"},
+						{"name":"PhotoIDType","type":"string"},
+						{"name":"DOB","type":"string"},
+						{"name":"Fname","type":"string"},
+						{"name":"Minitial","type":"string"},
+						{"name":"Lname","type":"string"},
+						{"name":"Filler1","type":"string"},
+						{"name":"DestCountry","type":"string"},
+						{"name":"ISODestCntrySenderSate","type":"string"},
+						{"name":"Occupation","type":"string"},
+						{"name":"Filler2","type":"string"},
+						{"name":"ReceiveCurrency","type":"string"},
+						{"name":"TransReportedAsSTR","type":"string"},
+						{"name":"FINTRACReference","type":"string"},
+						{"name":"IncludeInFile","type":"string"},
+						{"name":"IncludeInNarrative","type":"string"}
+				]}
 			]
 		}
   ],
@@ -756,8 +807,12 @@
 	"name":"MO Historical",
 	"format":"csv",
 	"delimiter":",",
-	"media":{"media":"local","path":"../../Data/CP/MO Historical Output.csv"},
-		"source":"MO Historical",
+	"source":"MO Historical",
+		"disabled":true,
+	"multipleMedia":[
+		{"media":"local","path":"../../Data/CP/MO Historical Output.csv","operation":"overwrite"},
+		{"media":"wave","path": "https://login.salesforce.com","operation":"overwrite", "credentials":"wave", "disabled":true}
+	],
 	"rows":[{
 		"columns":[
 			{"name":"FileDate","type":"date","format":"yyyy-MM-dd"},
@@ -786,6 +841,61 @@
 			{"name":"FeeCollected","type":"string"}
 		]
 	}]
+
+	},
+	{
+	"name":"MG Historical",
+	"format":"csv",
+	"delimiter":",",
+	"source":"MG Historical",
+	"multipleMedia":[
+		{"media":"local","path":"../../Data/CP/MG Historical Output.csv","operation":"overwrite"},
+		{"media":"wave","path": "https://login.salesforce.com","operation":"overwrite", "credentials":"wave", "disabled":false}
+	],
+	"rows":[
+		{"columns":[
+			{"name":"Record_Type","type":"string"},
+			{"name":"TransactionType","type":"string"},
+			{"name":"SettlementAgentID","type":"string"},
+			{"name":"LegacyUnitOfficeNo","type":"string"},
+			{"name":"LegacyAgentID","type":"string"},
+			{"name":"LegacyReferenceNumber","type":"string"},
+			{"name":"TransactionDate","type":"date", "format":"yyyy-MM-dd"},
+			{"name":"TransactionTime","type":"string", "format":"HH:mm:ss"},
+			{"name":"AgentStoreNumber","type":"string"},
+			{"name":"FaceValue","type":"money"},
+			{"name":"Fee","type":"money"},
+			{"name":"Commission","type":"money"},
+			{"name":"SendCountry","type":"string"},
+			{"name":"ISOSendCountry","type":"string"},
+			{"name":"FirstName","type":"string"},
+			{"name":"MiddleInitial","type":"string"},
+			{"name":"LastName","type":"string"},
+			{"name":"Address","type":"string"},
+			{"name":"City","type":"string"},
+			{"name":"Province","type":"string"},
+			{"name":"PostalCode","type":"string"},
+			{"name":"SenderReceiverCountry","type":"string"},
+			{"name":"ISOSenderReceiverCountry","type":"string"},
+			{"name":"SenderPhone","type":"string"},
+			{"name":"PhotoID","type":"string"},
+			{"name":"PhotoIDType","type":"string"},
+			{"name":"DOB","type":"string"},
+			{"name":"Fname","type":"string"},
+			{"name":"Minitial","type":"string"},
+			{"name":"Lname","type":"string"},
+			{"name":"Filler1","type":"string"},
+			{"name":"DestCountry","type":"string"},
+			{"name":"ISODestCntrySenderSate","type":"string"},
+			{"name":"Occupation","type":"string"},
+			{"name":"Filler2","type":"string"},
+			{"name":"ReceiveCurrency","type":"string"},
+			{"name":"TransReportedAsSTR","type":"string"},
+			{"name":"FINTRACReference","type":"string"},
+			{"name":"IncludeInFile","type":"string"},
+			{"name":"IncludeInNarrative","type":"string"}
+		]}
+	]
 
 	}
   ],

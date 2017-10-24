@@ -198,25 +198,41 @@ namespace Importer.Writers
 				}
 				stream.Flush();
 				var encCSVchunk = Convert.ToBase64String(stream.ToArray());
-				var client = new HttpClient();
 				var payload =
 					$"{{\"InsightsExternalDataId\":\"{context.SetId}\",\"PartNumber\":{++chunkNo},\"DataFile\":\"{encCSVchunk}\"}}";
-				var content = new StringContent(payload, Encoding.ASCII);
-				content.Headers.ContentType=new MediaTypeHeaderValue("application/json");
-				var url = $"{context.EntryPoint}/services/data/v41.0/sobjects/InsightsExternalDataPart";
-				client.AddAuthorization(context);
-				log.Debug($"Uploading chunk {chunkNo}");
-				var response = client.PostAsync(url, content).Result;
-				if (response.IsSuccessStatusCode)
+				var tryCount = 0;
+				while (true)
 				{
-					log.Debug($"Uploaded chunk #{chunkNo}");
-					if (isFinalizing)
+					try
 					{
-						context.FinalizeDatasetUpload(log).Wait();
+						var client = new HttpClient();
+						var content = new StringContent(payload, Encoding.ASCII);
+						content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+						var url = $"{context.EntryPoint}/services/data/v41.0/sobjects/InsightsExternalDataPart";
+						client.AddAuthorization(context);
+						log.Debug($"Uploading chunk #{chunkNo}");
+						var response = client.PostAsync(url, content).Result;
+						if (response.IsSuccessStatusCode)
+						{
+							log.Debug($"Uploaded chunk #{chunkNo}");
+							if (isFinalizing)
+							{
+								context.FinalizeDatasetUpload(log).Wait();
+							}
+							return chunkNo;
+						}
 					}
-					return chunkNo;
+					catch (Exception ex)
+					{
+						log.Error(Localization.GetLocalizationString("Error while uploading chunk #{0} - {1}", chunkNo, ex.Message));
+						log.Debug(ex.ToString());
+					}
+					if (++tryCount > 4)
+					{
+						throw new ImporterUploadException(Localization.GetLocalizationString("Failed to upload dataset."));
+					}
+					log.Debug(Localization.GetLocalizationString("Retrying to upload chunk#{0}", chunkNo));
 				}
-				throw new ImporterUploadException(response.Content.ReadAsStringAsync().Result);
 			};
 		}
 

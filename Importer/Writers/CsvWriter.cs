@@ -24,24 +24,25 @@ namespace Importer.Writers
             {
                 if (!isHeadersWritten && fileConfig.HasHeaders)
                 {
-                    var headers = new StringBuilder();
                     for (var r = 0; r < fileConfig.Rows.Count; r++)
                     {
                         for (var c = 0; c < fileConfig.Rows[r].Columns.Count; c++)
                         {
                             if (c > 0)
                             {
-                                headers.Append(delimiter);
+                                stream.Write(delimiter);
                             }
-                            headers.Append(fileConfig.Rows[r].Columns[c].Alias ?? fileConfig.Rows[r].Columns[c].Name);
+                            stream.Write(fileConfig.Rows[r].Columns[c].Alias ?? fileConfig.Rows[r].Columns[c].Name);
                         }
-                        headers.AppendLine();
+                        stream.WriteLine();
                     }
-                    stream.Write(headers.ToString());
                     isHeadersWritten = true;
                 }
                 if (!string.IsNullOrWhiteSpace(row.Error))
                 {
+                    log.Error(Localization.GetLocalizationString("Error in file {0}, line {1}",row.SourcePath, row.RawLineNumber) + " - " +
+                              (row.Error ?? "") + "\n\r\t" +
+                              string.Join(",", row.Columns.Values.Select(x => x.Source)));
                     return rowCount;
                 }
                 for (var r = 0; r < fileConfig.Rows.Count; r++)
@@ -68,22 +69,12 @@ namespace Importer.Writers
                             rowString.Append(delimiter);
                         }
                     }
-                    if (!string.IsNullOrWhiteSpace(row.Error))
-                    {
-                        log.Error(Localization.GetLocalizationString("Error in file {0}, line {1}",row.SourcePath, row.RawLineNumber) + " - " +
-                                  (row.Error ?? "") + "\n\r\t" +
-                                  string.Join(",", row.Columns.Values.Select(x => x.Source)));
-                    }
-                    else
-                    {
                         stream.WriteLine(rowString.ToString());
-                    }
                     rowCount++;
                 }
 
                 return rowCount;
             };
-
         }
         private static Func<string, ColumnType, string> GetQualifiedStrFunc(this ICsvFile fileConfig,ILog log)
         {
