@@ -55,7 +55,7 @@ namespace Importer.Readers
                                     Localization.GetLocalizationString("Parse error"), true, string.Join(",", line.Fields.Select(x => x.Source)))
                             }
                         },
-                        Localization.GetLocalizationString("Could not parse line."),currentRecord, line.LineNumber, line.Context.SourcePath);
+                        Localization.GetLocalizationString("Could not parse line."),currentRecord, line.LineNumber, line.Context.SourcePath, line.Context.FileConfiguration.Name);
                 }
                 
                 logger?.Info(string.Format(Localization.GetLocalizationString("Parsed {0}/{1} records from {2}"),parsedRecords,currentRecord,fileConfig.Name));
@@ -231,7 +231,7 @@ namespace Importer.Readers
                     error.Append(value.GetError() ?? "");
                     values[row.Columns[i].Name] = value;
                 }
-                return new DataRow(values, error.ToString(), rowNumber, rawLineNumber,source.Context.SourcePath);
+                return new DataRow(values, error.ToString(), rowNumber, rawLineNumber,source.Context.SourcePath,fileConfig.Name);
             };
         }
 

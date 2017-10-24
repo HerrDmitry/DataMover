@@ -74,7 +74,10 @@ namespace Importer.Writers
                                 return;
                             }
 
-                            rowCount = writerStream(row);
+                            if (row.SourceName == file.Name)
+                            {
+                                rowCount = writerStream(row);
+                            }
                         };
                 }
             }

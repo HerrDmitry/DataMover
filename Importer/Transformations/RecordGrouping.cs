@@ -138,7 +138,7 @@ namespace Importer
 				columns[c.Alias??c.Name] = value;
 			}
 
-			return new DataRow(columns, row.Error, row.RowNumber, row.RawLineNumber, row.SourcePath);
+			return new DataRow(columns, row.Error, row.RowNumber, row.RawLineNumber, row.SourcePath, row.SourceName);
 		}
 
 		private static IValue CloneValue(this IValue source, IColumn column)

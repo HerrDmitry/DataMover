@@ -43,6 +43,7 @@ namespace Tests
 
             public IValue this[string key] => Columns[key];
             public string SourcePath { get; set; }
+            public string SourceName { get; set; }
         }
 
         protected class DateValue : Value<DateTime>

@@ -6,13 +6,14 @@ namespace Importer.Readers
 	internal class DataRow : IDataRow
 	{
 		public DataRow(IDictionary<string, IValue> columns, string error, long rowNumber,
-			long rawLineNumber, string sourcePath)
+			long rawLineNumber, string sourcePath, string sourceName)
 		{
 			this.Columns = columns;
 			this.Error = error;
 			this.RowNumber = rowNumber;
 			this.RawLineNumber = rawLineNumber;
 			this.SourcePath = sourcePath;
+		    this.SourceName = sourceName;
 		}
 
 		public IDictionary<string, IValue> Columns { get; }
@@ -22,5 +23,6 @@ namespace Importer.Readers
 
 		public IValue this[string key] => this.Columns.TryGetValueDefault(key);
 		public string SourcePath { get; }
+	    public string SourceName { get; }
 	}
 }
