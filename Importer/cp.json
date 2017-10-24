@@ -251,6 +251,7 @@
 			"format":"csv",
 			"delimiter":"|",
 			"trimStrings":true,
+			"disabled":true,
 			"rows":[
 				{
 					"columns":[
@@ -360,6 +361,41 @@
 						{"name":"RefIDExpiryDate","type":"string"}
 					]
 				}]
+		},
+		{
+			"name":"MO Historical",
+			"format":"csv",
+			"delimiter":"|",
+			"media":{"media":"local","path":"../../Data/CP/MO 2016.csv"},
+			"rows":[{
+				"columns":[
+					{"name":"FileDate","type":"date","format":"yyyy-MM-dd HH:mm:ss"},
+						{"name":"MOStatus","type":"string"},
+						{"name":"SerialNumber","type":"string"},
+						{"name":"SourceSystem","type":"string"},
+						{"name":"EODRunDate","type":"date", "format":"yyyyMMdd" },
+						{"name":"MoneyOrder Issue Date","type":"date","format":"yyyy-MM-dd HH:mm:ss"},
+						{"name":"RCNumber","type":"string"},
+						{"name":"Country","type":"string"},
+						{"name":"Currency","type":"string"},
+						{"name":"Amount","type":"money"},
+						{"name":"FeeCode","type":"string"},
+						{"name":"OutletClerkUserID","type":"string"},
+						{"name":"PayeeFName","type":"string"},
+						{"name":"PayeeInitial","type":"string"},
+						{"name":"PayeeLName","type":"string"},
+						{"name":"PayeeCompanyName","type":"string"},
+						{"name":"SenderFName","type":"string"},
+						{"name":"SenderInitial","type":"string"},
+						{"name":"SenderLName","type":"string"},
+						{"name":"SenderCompanyNameCOD","type":"string"},
+						{"name":"EODNumber","type":"string"},
+						{"name":"ExchangeRate","type":"string"},
+						{"name":"ExchangeAmount","type":"string"},
+						{"name":"FeeCollected","type":"string"}
+				]
+			}
+			]
 		}
   ],
   "targets":[
@@ -601,6 +637,7 @@
 			"source":"Fintrac",
 			"hasHeaders":false,
 			"fixForExcel":false,
+			"disabled":true,
 			"multipleMedia":[
 				{"media":"local","path": "../../Data/CP/fintrac wave.csv","operation":"overwrite"},
 				{"media":"wave","path": "https://login.salesforce.com","operation":"overwrite", "credentials":"wave", "disabled":false}
@@ -714,7 +751,43 @@
 						{"name":"RefIDExpiryDate","type":"string"}
 					]
 				}]
-		}
+		},
+	{
+	"name":"MO Historical",
+	"format":"csv",
+	"delimiter":",",
+	"media":{"media":"local","path":"../../Data/CP/MO Historical Output.csv"},
+		"source":"MO Historical",
+	"rows":[{
+		"columns":[
+			{"name":"FileDate","type":"date","format":"yyyy-MM-dd"},
+			{"name":"MOStatus","type":"string"},
+			{"name":"SerialNumber","type":"string"},
+			{"name":"SourceSystem","type":"string"},
+			{"name":"EODRunDate","type":"date", "format":"yyyyMMdd" },
+			{"name":"MoneyOrder Issue Date","type":"date","format":"yyyy-MM-dd"},
+			{"name":"RCNumber","type":"string"},
+			{"name":"Country","type":"string"},
+			{"name":"Currency","type":"string"},
+			{"name":"Amount","type":"money"},
+			{"name":"FeeCode","type":"string"},
+			{"name":"OutletClerkUserID","type":"string"},
+			{"name":"PayeeFName","type":"string"},
+			{"name":"PayeeInitial","type":"string"},
+			{"name":"PayeeLName","type":"string"},
+			{"name":"PayeeCompanyName","type":"string"},
+			{"name":"SenderFName","type":"string"},
+			{"name":"SenderInitial","type":"string"},
+			{"name":"SenderLName","type":"string"},
+			{"name":"SenderCompanyNameCOD","type":"string"},
+			{"name":"EODNumber","type":"string"},
+			{"name":"ExchangeRate","type":"string"},
+			{"name":"ExchangeAmount","type":"string"},
+			{"name":"FeeCollected","type":"string"}
+		]
+	}]
+
+	}
   ],
 	"logFiles":[
 		{
